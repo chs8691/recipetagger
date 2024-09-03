@@ -162,3 +162,5 @@ cython_debug/
 #.idea/
 /import
 X-Recipies*.csv
+.DS_Store
+.dtrash
