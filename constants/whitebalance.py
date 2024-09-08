@@ -1,7 +1,16 @@
 # White Balance
+# Not all possible EXIF values are defined. Missing values for other cameras
+# have to be added. 
+# For all values see https://exiftool.org/TagNames/FujiFilm.html
 AUTO = 'AUTO'
 WHITE_PRIORITY = 'WHITE_PRIORITY'
 AMBIENCE_PRIORITY = 'AMBIENCE_PRIORITY'
 KELVIN = 'KELVIN'
 DAYLIGHT = 'DAYLIGHT'
 SHADE = 'SHADE'
+FLUORESCENT1 = 'FLUORESCENT1'
+FLUORESCENT2 = 'FLUORESCENT2'
+FLUORESCENT3 = 'FLUORESCENT3'
+INCANDESENT = 'INCANDESENT'
+UNDERWATER = 'UNDERWATER'
+UNKNOWN = 'UNKNOWN'
