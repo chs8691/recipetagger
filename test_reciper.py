@@ -9,6 +9,7 @@ import constants.drangepriority as DP
 import constants.whitebalance as WB
 import constants.sensor as SR
 import constants.colorchrome as CC
+import constants.bwfilter as BWF
 from os import path
 
 import logging
@@ -22,6 +23,79 @@ X_T50 = 'X-T50'
 X_S10 = 'X-S10'
 cameras = [X_T50, X_S10]
 
+def test_images_color_chrome_effects():
+    assert 'TBC' == 'TODO'
+
+def test_images_grain():
+
+    attribute = 'Grain'
+    r = R.GRAIN_EFFECT
+
+    for c in cameras:
+
+        for (n,v) in [
+            ('off', G.OFF),
+            ('strong-small', G.STRONG_SMALL),
+            ('weak-large', G.WEAK_LARGE),
+        ]:
+
+            name = f'testdata/{c}/{c}-{attribute}-{n}.JPG'
+
+            if not path.exists(name):
+                LOGGER.warning(f'Missing test image: {name}')
+                continue
+        
+            act = reciper.read_file(name)
+
+            assert act[r] == v , name
+
+
+def test_images_sharpness():
+
+    attribute = 'Sharpness'
+    r = R.SHARPNESS
+
+    for c in cameras:
+
+        for (n,v) in [
+            ('-4', -4),
+            ('+4', 4),
+        ]:
+
+            name = f'testdata/{c}/{c}-{attribute}{n}.JPG'
+
+            if not path.exists(name):
+                LOGGER.warning(f'Missing test image: {name}')
+                continue
+        
+            act = reciper.read_file(name)
+
+            assert act[r] == v , name
+
+
+def test_images_saturation():
+
+    attribute = 'Saturation'
+    r = R.COLOR
+
+    for c in cameras:
+
+        for (n,v) in [
+            ('-4', -4),
+            ('+4', 4),
+        ]:
+
+            name = f'testdata/{c}/{c}-{attribute}{n}.JPG'
+
+            if not path.exists(name):
+                LOGGER.warning(f'Missing test image: {name}')
+                continue
+        
+            act = reciper.read_file(name)
+
+            assert act[r] == v , name
+
+
 def test_images_drp_strong():
 
     for c in cameras:
@@ -33,7 +107,7 @@ def test_images_drp_strong():
       
         act = reciper.read_file(name)
 
-        assert act[R.DRANGE_PRIORITY] == DP.STRONG
+        assert act[R.DRANGE_PRIORITY] == DP.STRONG , name
 
 
 def test_images_drp_auto():
@@ -47,7 +121,7 @@ def test_images_drp_auto():
       
         act = reciper.read_file(name)
 
-        assert act[R.DRANGE_PRIORITY] == DP.STRONG
+        assert act[R.DRANGE_PRIORITY] == DP.STRONG , name
 
 
 def test_images_dr_400():
@@ -61,10 +135,10 @@ def test_images_dr_400():
       
         act = reciper.read_file(name)
 
-        assert R.DRANGE_PRIORITY not in act
-        assert act[R.DYNAMIC_RANGE] == DR.DR400
-        assert act[R.HIGHLIGHTS] == 0
-        assert act[R.SHADOWS] == 0 
+        assert R.DRANGE_PRIORITY not in act , name
+        assert act[R.DYNAMIC_RANGE] == DR.DR400 , name
+        assert act[R.HIGHLIGHTS] == 0 , name
+        assert act[R.SHADOWS] == 0  , name
 
 
 def test_images_dr_auto():
@@ -77,68 +151,76 @@ def test_images_dr_auto():
       
         act = reciper.read_file(name)
 
-        assert R.DRANGE_PRIORITY not in act
-        assert act[R.DYNAMIC_RANGE] == DR.DR100
-        assert act[R.HIGHLIGHTS] == 0
-        assert act[R.SHADOWS] == 0 
-
-def test_images_fs_astia():
-   for c in cameras:
-        
-        name = f'testdata/{c}/{c}-FS-Astia.JPG'
-        if not path.exists(name):
-            LOGGER.warning(f'Missing test image: {name}')
-            continue
-      
-        act = reciper.read_file(name)
-        assert act[R.FILMSIMULATION] == FS.ASTIA
+        assert R.DRANGE_PRIORITY not in act , name
+        assert act[R.DYNAMIC_RANGE] == DR.DR100 , name
+        assert act[R.HIGHLIGHTS] == 0 , name
+        assert act[R.SHADOWS] == 0  , name
 
 
-def test_images_fs_acros():
-   for c in cameras:
-        
-        name = f'testdata/{c}/{c}-FS-Acros.JPG'
-        if not path.exists(name):
-            LOGGER.warning(f'Missing test image: {name}')
-            continue
-      
-        act = reciper.read_file(name)
-        assert act[R.FILMSIMULATION] == FS.ACROS
-
-
-
-def test_images_fs_realaace():
-   for c in cameras:
-        
-        # Exclude Cameras without this FS
-        if c in [X_S10]:
-            continue
+def test_images_fs_bw():
    
-        name = f'testdata/{c}/{c}-FS-RealaAce.JPG'
-        if not path.exists(name):
-            LOGGER.warning(f'Missing test image: {name}')
-            continue
-      
-        act = reciper.read_file(name)
-        assert act[R.FILMSIMULATION] == FS.REALA_ACE
-
-
-def test_images_fs_nostalgicneg():
    for c in cameras:
         
-        # Exclude Cameras without this FS
-        if c in [X_S10]:
-            continue
-   
-        name = f'testdata/{c}/{c}-FS-NostalgicNeg.JPG'
-        if not path.exists(name):
-            LOGGER.warning(f'Missing test image: {name}')
-            continue
-      
-        act = reciper.read_file(name)
-        assert act[R.FILMSIMULATION] == FS.NOSTALGIC_NEG
+        for (fs, ft) in[
+            (FS.ACROS, None),
+            (FS.ACROS, BWF.RED),
+            (FS.MONOCHROME, None),
+            (FS.MONOCHROME, BWF.YELLOW),
+        ]:
+            if ft is None:
+                name =  fs
+            else:
+                name = fs + '+' + ft
+        
+            name = f'testdata/{c}/{c}-FS-{name}.JPG'
+            if not path.exists(name):
+                LOGGER.warning(f'Missing test image: {name}')
+                continue
+        
+            act = reciper.read_file(name)
+            assert act[R.FILMSIMULATION] == fs
+
+            if ft is None:
+                assert R.BW_FILTER not in act , name
+            else:
+                assert act[R.BW_FILTER] == ft , name
 
 
+def test_images_fs_color():
+
+   for c in cameras:
+        
+        for f in [
+            FS.ASTIA,
+            FS.PROVIA ,
+            FS.CLASSIC_CHROME ,
+            FS.CLASSIC_NEG ,
+            FS.ETERNA ,
+            FS.ETERNA_BLEACH_BYPASS ,
+            FS.NOSTALGIC_NEG ,
+            FS.PROVIA ,
+            FS.PRO_NEG_HI ,
+            FS.PRO_NEG_STD ,
+            FS.REALA_ACE ,
+            FS.VELVIA,
+            ]:
+
+            # Skip non existing filmsimulations
+            match c:
+                case X_S10:
+                    if f in [FS.REALA_ACE,
+                             FS.NOSTALGIC_NEG]:
+                        continue                
+
+            name = f'testdata/{c}/{c}-FS-{f}.JPG'
+            if not path.exists(name):
+                LOGGER.warning(f'Missing test image: {name}')
+                continue
+
+            act = reciper.read_file(name)
+            assert act[R.FILMSIMULATION] == f , name
+
+        
 def test_map_drange_priority():
     assert ex.map_drange_priority(None) == None
     assert ex.map_drange_priority(1) == DP.WEAK
@@ -159,6 +241,56 @@ def test_exif_map_wb_finetune():
     assert ex.map_wb_finetune("19 -18") == (19, -18)
     assert ex.map_wb_finetune("20 -40") == (1, -2)
 
+def test_exif_sharpness():
+    assert ex.map_sharpness(0) == -4
+    assert ex.map_sharpness(1) == -3
+    assert ex.map_sharpness(2) == -2
+    assert ex.map_sharpness(3) == 0
+    assert ex.map_sharpness(4) == 2
+    assert ex.map_sharpness(5) == 3
+    assert ex.map_sharpness(6) == 4
+    assert ex.map_sharpness(130) == -1 
+    assert ex.map_sharpness(132) == 1
+
+def test_exif_map_clarity():
+    assert ex.map_clarity(0) == 0
+    assert ex.map_clarity(-1000) == -1
+    assert ex.map_clarity(-5000) == -5
+    assert ex.map_clarity(1000) == 1
+    assert ex.map_clarity(5000) == 5
+
+def test_exif_map_noisereduction():
+    assert ex.map_noisereduction(0) == 0
+    assert ex.map_noisereduction(256) == 2
+    assert ex.map_noisereduction(384) == 1
+    assert ex.map_noisereduction(448) == 3
+    assert ex.map_noisereduction(480) == 4
+    assert ex.map_noisereduction(512) == -2
+    assert ex.map_noisereduction(640) == -1
+    assert ex.map_noisereduction(704) == -3
+    assert ex.map_noisereduction(736) == -4
+
+
+def test_exif_map_saturation():
+    assert ex.map_saturation(0) == 0
+    assert ex.map_saturation(128) == 1
+    assert ex.map_saturation(256) == 2
+    assert ex.map_saturation(192) == 3
+    assert ex.map_saturation(224) == 4
+    assert ex.map_saturation(384) == -1
+    assert ex.map_saturation(1024) == -2
+    assert ex.map_saturation(1216) == -3
+    assert ex.map_saturation(1248) == -4
+    assert ex.map_saturation(768) == (FS.MONOCHROME, None)
+    assert ex.map_saturation(769) == (FS.MONOCHROME, BWF.RED)
+    assert ex.map_saturation(770) == (FS.MONOCHROME, BWF.YELLOW)
+    assert ex.map_saturation(771) == (FS.MONOCHROME, BWF.GREEN)
+    assert ex.map_saturation(784) == (FS.SEPIA, None)
+    assert ex.map_saturation(1280) == (FS.ACROS, None)
+    assert ex.map_saturation(1281) == (FS.ACROS, BWF.RED)
+    assert ex.map_saturation(1282) == (FS.ACROS, BWF.YELLOW)
+    assert ex.map_saturation(1283) == (FS.ACROS, BWF.GREEN)
+
 
 def test_exif_map_color_chrome():
     assert ex.map_color_chrome(0) == CC.OFF
@@ -170,10 +302,10 @@ def test_exif_map_color_chrome():
 def test_exif_map_grain():
     assert ex.map_grain(0, 0) == G.OFF
     assert ex.map_grain(1, 1) == None
-    assert ex.map_grain(16, 16) == G.WEAK_SMALL
-    assert ex.map_grain(16, 32) == G.WEAK_LARGE
-    assert ex.map_grain(32, 16) == G.STRONG_SMALL
-    assert ex.map_grain(32, 32) == G.STRONG_LARGE
+    assert ex.map_grain(32, 16) == G.WEAK_SMALL
+    assert ex.map_grain(32, 32) == G.WEAK_LARGE
+    assert ex.map_grain(64, 16) == G.STRONG_SMALL
+    assert ex.map_grain(64, 32) == G.STRONG_LARGE
 
 
 def test_exif_map_white_balance():
@@ -311,6 +443,7 @@ def test_exif_map_filmsimulation():
     
     assert ex.map_filmsimulation(0) == FS.PROVIA
     assert ex.map_filmsimulation(288) == FS.ASTIA
+    assert ex.map_filmsimulation(512) == FS.VELVIA
     assert ex.map_filmsimulation(1024) == FS.VELVIA
     assert ex.map_filmsimulation(1280) == FS.PRO_NEG_STD
     assert ex.map_filmsimulation(1281) == FS.PRO_NEG_HI

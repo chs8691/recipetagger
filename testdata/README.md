@@ -6,3 +6,4 @@ Missing images of a specific test case for a camera will be reported as WARNING.
 log_cli_level = 30 
 ```
 
+The name for the film simulations must match exactly the values in `constants.filmsimulations`. For a B&W film simulation the  opional filter value must exactly match the value in `constants.bwfilter`, joined by `+`. 

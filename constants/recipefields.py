@@ -1,8 +1,9 @@
-# Recipe fields. EXIF and Recipies import will campared by this attributes
+# Recipe fields. EXIF and Recipies import will compared by this attributes
 
 NAME  = 'Name'                            # Recipe Name (recipe only)
 PUBLISHER  = 'Publisher'                  # Publisher, String.  Empty if private recipe (recipe only)
 FILMSIMULATION   = 'Filmsimulation'       # String Fujifilm's Simulation Name. See FS....
+BW_FILTER    = 'BW Filter'                # String Fujifilm's Simulation Name. See bwfilter
 BW_COLOR_WC   = 'BW Color WC'             # Signed Integer: -18 .. 18
 BW_COLOR_MC   = 'BW Color MC'             # Signed Integer: -18 .. 18
 GRAIN_EFFECT   = 'Grain Effect'           # String: Off, Weak/Small, Weak/Large, Strong/Small or Strong/Large

@@ -86,21 +86,34 @@ def read_file(filename):
                 vvlog(f"Dict: {k} = {v}")   
         
             field='MakerNotes:FilmMode'
-            value=d[field]
-            vvlog(f'{field}={value}')
-            # Color film only; not existing for monochromatic films
+            # Color film; not existing for monochromatic films
             if(field in d):   
+        
+                value=d[field]
+                vvlog(f'{field}={value}')
+        
                 exif[R.FILMSIMULATION] = ex.map_filmsimulation(d[field])
+
+                field='MakerNotes:Saturation'         
+                exif[R.COLOR]=ex.map_saturation(d[field])
             
-            # Monochromatic film only (ACROS, MONOCHROMATIC)
+            # Monochromatic film (ACROS, MONOCHROME, SEPIA)
             else:
+
+                field='MakerNotes:Saturation'         # Color value or ACROS etc.  
+                value = None 
+                (exif[R.FILMSIMULATION], value)=ex.map_saturation(d[field])
+                
+                if value is not None:
+                    exif[R.BW_FILTER] = value
+
                 field='MakerNotes:BWAdjustment'                # Monochromatic Color warm/cool
                 exif[R.BW_COLOR_WC] = d[field]
                 field='MakerNotes:BWMagentaGreen'              # Monochromatic Color magenta/green
                 exif[R.BW_COLOR_MC] = d[field]
             
             field='MakerNotes:Sharpness'
-            exif[R.SHARPNESS] = d[field]
+            exif[R.SHARPNESS] = ex.map_sharpness(d[field])
             
             exif[R.GRAIN_EFFECT] = ex.map_grain(
                 d['MakerNotes:GrainEffectRoughness'],
@@ -154,17 +167,11 @@ def read_file(filename):
                 field='MakerNotes:ShadowTone'
                 exif[R.SHADOWS] = d[field]
               
+            field='MakerNotes:NoiseReduction'            
+            exif[R.HIGH_ISONR]=ex.map_noisereduction(d[field])
 
-            field='MakerNotes:Sharpness'              
-            exif[R.SHARPNESS]=d[field]
-
-
-            # field='MakerNotes:Saturation'                    # Color value or ACROS etc.   
-            # exif[R.]=d[field]
-            # field='MakerNotes:NoiseReduction'            
-            # exif[R.]=d[field]
-            # field='MakerNotes:Clarity'
-            # exif[R.]=d[field]
+            field='MakerNotes:Clarity'
+            exif[R.CLARITY]=ex.map_clarity(d[field])
 
     # img = Image(filename)
     # img.read_exif()

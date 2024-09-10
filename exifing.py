@@ -4,7 +4,10 @@
 # For his, there is a lookup table for Fuji specific tags dcumentented in 
 # https://exiftool.org/TagNames/FujiFilm.html 
 # 
-# Exiftool: use '-n' to see the unconverted value
+# Exiftool: use '-n' to see the unconverted value, e.g.:
+#
+# exiftool -NoiseReduction -n testdata/X-T50/X-T50-FS-Acros.JPG
+# 736
 
 import constants.whitebalance as WB
 import constants.grain as G
@@ -12,6 +15,8 @@ import constants.dynamicrange as DR
 import constants.colorchrome as CC
 import constants.filmsimulations as FS
 import constants.drangepriority as DP
+import constants.bwfilter as BWF
+
 
 def map_wb_finetune(values):
     """Maps string with 2 integer  as finetune values. Returns integer duple.
@@ -28,6 +33,24 @@ def map_wb_finetune(values):
         return (int(r) / 20, int(b) / 20)
     
 
+def map_clarity(value):
+    """Returns values as signed integer. 
+    In exif, the value is a signed integer, too.
+
+        -5000 = -5
+        -4000 = -4
+        -3000 = -3
+        -2000 = -2	  	
+        -1000 = -1
+        0 = 0
+        1000 = 1
+        2000 = 2	  	
+        3000 = 3
+        4000 = 4
+        5000 = 5
+    """
+
+    return value / 1000
 
 def map_color_chrome(value):
     """For Color Chrome Effect and Color Chrome FX Blue.
@@ -179,13 +202,13 @@ def map_grain(roughness, size):
         case 0:
             return G.OFF
    
-        case 16:
+        case 32:
             if size == 16:
                 return G.WEAK_SMALL
             elif size == 32:
                 return G.WEAK_LARGE
 
-        case 32:
+        case 64:
             if size == 16:
                 return G.STRONG_SMALL
             elif size == 32:
@@ -193,6 +216,161 @@ def map_grain(roughness, size):
     
     return None
 
+
+def map_saturation(value):
+    """ Holds satutation value for color film simulations or film simulations and filter
+    names for black and white (incl. Sepia)
+    Returns either integer value of, for black & white stuff, a duple with FS and Filter
+    
+        0x0 = 0 (normal)
+        0x80 = +1 (medium high)
+        0xc0 = +3 (very high)
+        0xe0 = +4 (highest)
+        0x100 = +2 (high)
+        0x180 = -1 (medium low)
+        0x200 = Low
+        0x300 = None (B&W)
+        0x301 = B&W Red Filter
+        0x302 = B&W Yellow Filter
+        0x303 = B&W Green Filter
+        0x310 = B&W Sepia
+        0x400 = -2 (low)
+        0x4c0 = -3 (very low)
+        0x4e0 = -4 (lowest)
+        0x500 = Acros
+        0x501 = Acros Red Filter
+        0x502 = Acros Yellow Filter
+        0x503 = Acros Green Filter
+        0x8000 = Film Simulation
+    """
+
+    match hex(value):
+        case '0x0':
+            return 0
+        case '0x80':
+            return 1
+        case '0xc0':
+            return 3
+        case '0xe0':
+            return 4
+        case '0x100':
+            return 2
+        case '0x180':
+            return -1
+        case '0x200':
+            return None # Unsupported value
+        case '0x300':
+            return (FS.MONOCHROME, None)
+        case '0x301':
+            return (FS.MONOCHROME, BWF.RED)
+        case '0x302':
+            return (FS.MONOCHROME, BWF.YELLOW)
+        case '0x303':
+            return (FS.MONOCHROME, BWF.GREEN)
+        case '0x310':
+            return (FS.SEPIA, None)
+        case '0x400':
+            return -2
+        case '0x4c0':
+            return -3
+        case '0x4e0':
+            return -4
+        case '0x500':
+            return (FS.ACROS, None)
+        case '0x501':
+            return (FS.ACROS, BWF.RED)
+        case '0x502':
+            return (FS.ACROS, BWF.YELLOW)
+        case '0x503':
+            return (FS.ACROS, BWF.GREEN)
+        case '0x8000':
+            return None # Unsupported value
+
+    return None
+
+
+def map_sharpness(value):
+    """ Returns signed integer value or, in error case, None
+    This is the exif tag MakerNotes:Sharpness. 
+    
+    In the exif the value is an integer.
+    
+        0x0 = -4 (softest)
+        0x1 = -3 (very soft)
+        0x2 = -2 (soft)
+        0x3 = 0 (normal)
+        0x4 = +2 (hard)
+        0x5 = +3 (very hard)
+        0x6 = +4 (hardest)
+        0x82 = -1 (medium soft)
+        0x84 = +1 (medium hard)
+        0x8000 = Film Simulation
+        0xffff = n/a
+
+    There is an exif tag Sharpness, too. This holds only 
+    1 (soft) or 2 (hard). 
+    """
+
+    match hex(value):
+        case '0x0':  
+            return -4
+        case '0x1':  
+            return -3
+        case '0x2':  
+            return -2
+        case '0x3':
+            return 0
+        case '0x4': 
+            return 2
+        case '0x5': 
+            return 3
+        case '0x6':
+            return 4
+        case '0x82': 
+            return -1
+        case '0x84': 
+            return 1
+        case '0x8000': 
+            return None # Not supported value
+        
+    return None
+
+def map_noisereduction(value):
+    """ Returns integer value of, in error case, None
+    In the exif the value is an integer.
+    
+        x0 = 0 (normal)
+        0x100 = +2 (strong)
+        0x180 = +1 (medium strong)
+        0x1c0 = +3 (very strong)
+        0x1e0 = +4 (strongest)
+        0x200 = -2 (weak)
+        0x280 = -1 (medium weak)
+        0x2c0 = -3 (very weak)
+        0x2e0 = -4 (weakest)
+    """
+
+    match hex(value):
+        case '0x0':
+            return 0
+        case '0x100':
+            return 2
+        case '0x180':
+            return 1
+        case '0x1c0':
+            return 3
+        case '0x1e0':
+            return 4
+        case '0x200':
+            return -2
+        case '0x280':
+            return -1
+        case '0x2c0':
+            return -3
+        case '0x2e0':
+            return -4
+
+    return None
 
 def map_filmsimulation(value):
     """Parse integer value and return value of constants.filmsimulations or, if no match, None. 
@@ -229,11 +407,11 @@ def map_filmsimulation(value):
         case '0x130':
             return None #"Studio Portrait Increased Sharpness"
         case '0x200':
-            return None #"F2/Fujichrome (Velvia)"
+            return FS.VELVIA # No distinvtion between the various VELVIAs
         case '0x300':
             return None #"Studio Portrait Ex"
         case '0x400':
-            return FS.VELVIA
+            return FS.VELVIA # No distinvtion between the various VELVIAs
         case '0x500':
             return FS.PRO_NEG_STD
         case '0x501':
