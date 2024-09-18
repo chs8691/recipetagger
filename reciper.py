@@ -4,6 +4,9 @@ import exifing as ex
 import reciping as rp
 import constants.recipefields as R
 import constants.whitebalance as WB
+import constants.filmsimulations as FS
+import constants.grain as GR
+import constants.colorchrome as CC
 
 # exiftool must be installed on the system
 from exiftool import ExifToolHelper
@@ -36,8 +39,10 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', help='Increase output verbosity.', action="store_true")
     parser.add_argument('-vv', '--vverbose', help='Increase output very verbosity.', action="store_true")
-    parser.add_argument('-r', '--recipies', type=str, nargs=1, default='X-Recipies.csv',
+    parser.add_argument('-r', '--recipies', type=str, nargs=1, default='reipies.csv',
                         help='Update recipies from CSV file (Default: %(default)s) and store them in the internal Storage. See example file for columns names. ')
+    parser.add_argument('-p', '--print', action='store_true',
+                        help='Print result to console')
     parser.add_argument('filename', metavar='FILENAME', type=str, nargs=1,
                     help='Image file name')
     
@@ -53,7 +58,6 @@ def import_recipies(filename):
 
     with open(filename, newline='') as csvfile:
         spamreader = csv.DictReader(csvfile, delimiter=',', quotechar='"')
-
 
         row_count = 0
         for row in spamreader:
@@ -78,6 +82,7 @@ def read_file(filename):
     log(f'Readin Image file {filename}')
 
     exif = dict()
+    exif[R.NAME] = filename
 
     with ExifToolHelper() as et:
         for d in et.get_metadata(filename):
@@ -107,10 +112,11 @@ def read_file(filename):
                 if value is not None:
                     exif[R.BW_FILTER] = value
 
-                field='MakerNotes:BWAdjustment'                # Monochromatic Color warm/cool
-                exif[R.BW_COLOR_WC] = d[field]
-                field='MakerNotes:BWMagentaGreen'              # Monochromatic Color magenta/green
-                exif[R.BW_COLOR_MC] = d[field]
+                if exif[R.FILMSIMULATION] != FS.SEPIA:
+                    field='MakerNotes:BWAdjustment'    # Monochromatic Color warm/cool
+                    exif[R.BW_COLOR_WC] = d[field]
+                    field='MakerNotes:BWMagentaGreen'  # Monochromatic Color magenta/green
+                    exif[R.BW_COLOR_MC] = d[field]
             
             field='MakerNotes:Sharpness'
             exif[R.SHARPNESS] = ex.map_sharpness(d[field])
@@ -129,7 +135,7 @@ def read_file(filename):
             field='MakerNotes:WhiteBalance'          
             exif[R.WHITE_BALANCE] = ex.map_whitebalance(d[field])
 
-            # field='MakerNotes:ColorTemperature'      
+            field='MakerNotes:ColorTemperature'      
             if(exif[R.WHITE_BALANCE] == WB.KELVIN):           
                 exif[R.KELVIN] = d[field]
     
@@ -173,12 +179,200 @@ def read_file(filename):
             field='MakerNotes:Clarity'
             exif[R.CLARITY]=ex.map_clarity(d[field])
 
-    # img = Image(filename)
-    # img.read_exif()
-    # img.close()
-    # vvlog(exif)
+            field='EXIF:ISO'
+            exif[R.ISO]=d[field]
+
+        log(exif)
     return exif
 
+
+def find_recipe(exif, recipies):
+    
+    res = []
+    for r in recipies:
+        res.append(check_recipe(exif, r))
+
+    log(res)
+
+
+def check_recipe(exif, recipe):
+    """ Compare image exifs data wth recipe's data to find differences and calculate a
+        total score percentage value.
+        Returns tupel with two values:
+        - score pertance value (0..100)
+        - list with field names that doesn't match 100 %
+        Example: ( 90, [R.COLOR, R.SHARPNESS] )
+        Every single score will be weightend between 0..10. For instance FILMSIMULATION
+        is very important: weight=10
+    """
+    failed = []
+    total = 0
+    max_total = 0
+    MAX = 100
+
+    field = R.FILMSIMULATION
+    weight = 10
+    act = rate_fs(exif[field], recipe[field])
+    total += act * weight
+    max_total += MAX * weight
+    if act < MAX:
+        failed.append(field)
+
+    field = R.GRAIN_EFFECT
+    weight = 3
+    act =  rate_range(0, 4, grain_as_int(exif[field]), grain_as_int(recipe[field]))
+    total += act * weight
+    max_total += MAX * weight
+    if act < MAX:
+        failed.append(field)
+
+    field = R.CCR_EFFECT
+    weight = 2
+    act =  rate_range(0, 2, cc_as_int(exif[field]), cc_as_int(recipe[field]))
+    total += act * weight
+    max_total += MAX * weight
+    if act < MAX:
+        failed.append(field)
+
+    field = R.CCRFX_BLUE
+    weight = 2
+    act =  rate_range(0, 2, cc_as_int(exif[field]), cc_as_int(recipe[field]))
+    total += act * weight
+    max_total += MAX * weight
+    if act < MAX:
+        failed.append(field)
+
+    field = R.SHARPNESS
+    weight = 1
+    act = rate_range(-4, +4, exif[field], recipe[field])
+    total += act * weight
+    max_total += MAX * weight
+    if act < MAX:
+        failed.append(field)
+
+    field = R.HIGH_ISONR
+    weight = 2
+    act = rate_range(-4, +3, exif[field], recipe[field])
+    total += act * weight
+    max_total += MAX * weight
+    if act < MAX:
+        failed.append(field)
+
+    field = R.CLARITY
+    weight = 5
+    act = rate_range(-4, 5, exif[field], recipe[field])
+    total += act * weight
+    max_total += MAX * weight
+    if act < MAX:
+        failed.append(field)
+
+
+    bws=[FS.ACROS, FS.MONOCHROME]
+    if exif[R.FILMSIMULATION] in bws and recipe in bws:
+
+        field = R.BW_COLOR_WC
+        weight = 1
+        act = rate_range(-18, +18, exif[field], recipe[field])
+        total += act * weight
+        max_total += MAX * weight
+        if act < MAX:
+            failed.append(field)
+
+        field = R.BW_COLOR_MC
+        weight = 1
+        act = rate_range(-18, +18, exif[field], recipe[field])
+        total += act * weight
+        max_total += MAX * weight
+        if act < MAX:
+            failed.append(field)
+
+    elif exif[R.FILMSIMULATION] not in bws and recipe not in bws:
+
+        field = R.COLOR
+        weight = 1
+        act = rate_range(-4, +4, exif[field], recipe[field])
+        total += act * weight
+        max_total += MAX * weight
+        if act < MAX:
+            failed.append(field)
+
+    # else
+    #  Was soll mit BW/Farbe passieren? 
+
+
+    return (100 / max_total * total, failed)
+
+
+def grain_as_int(value):
+    """Interprates GRAIN value as integer for better compareness.
+    Return interger 0 (OFF) ... 4 (STRONG/LARGE)"""
+        
+    if value == GR.WEAK_SMALL:
+        return 1
+    
+    elif value == GR.WEAK_LARGE:
+        return 2
+
+    elif value == GR.STRONG_SMALL:
+        return 3
+    
+    elif value == GR.STRONG_LARGE:
+        return 4
+
+    return 0
+
+
+def cc_as_int(value):
+    """Interprates Color Chrome Effect/Blue value as integer for better compareness.
+    Return interger 0 (OFF) .. 2 (STRONG)"""
+        
+    if value == CC.WEAK:
+        return 1
+    
+    elif value == CC.STRONG:
+        return 2
+
+    return 0
+
+
+def rate_range(min, max, evalue, rvalue):
+    """Returns integer 0 (no match) .. 100 (total match) 
+        Range: min .. max. Can include 0 as valid value, e.g. -4..5
+        min: can be < 0
+        max: must be > 0
+    """
+
+    # Include 0 as value
+    max = abs(min) + max + 1 
+
+    diff = abs(evalue - rvalue)
+
+    return int(100 / max * (max - diff))
+
+
+def rate_fs(evalue, rvalue):
+    """Returns integer 0 (no match) .. 100 (total match) """
+    
+    if evalue == rvalue:
+        return 100
+    
+    fs = [FS.ACROS, FS.MONOCHROME]
+    if evalue in [fs] and rvalue in [fs]:
+        return 80
+    
+    fs = [FS.ASTIA, FS.PROVIA]
+    if evalue in [fs] and rvalue in [fs]:
+        return 80
+
+    fs = [FS.PRO_NEG_HI, FS.REALA_ACE, FS.CLASSIC_CHROME]
+    if evalue in [fs] and rvalue in [fs]:
+        return 70
+    
+    fs = [FS.CLASSIC_NEG, FS.NOSTALGIC_NEG, FS.ETERNA]
+    if evalue in [fs] and rvalue in [fs]:
+        return 30
+    
+    return 0
 
 def process():
     
@@ -186,7 +380,9 @@ def process():
 
     recipies = import_recipies(args.recipies[0])
 
-    exif_dict=read_file(args.filename[0])
+    exif=read_file(args.filename[0])
+
+    find_recipe(exif, recipies)
 
     
 

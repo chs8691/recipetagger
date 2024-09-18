@@ -1,6 +1,7 @@
 # Recipe fields. EXIF and Recipies import will compared by this attributes
+# This fields will be used for recipe and for image data.
 
-NAME  = 'Name'                            # Recipe Name (recipe only)
+NAME  = 'Name'                            # Recipe name or file name 
 PUBLISHER  = 'Publisher'                  # Publisher, String.  Empty if private recipe (recipe only)
 FILMSIMULATION   = 'Filmsimulation'       # String Fujifilm's Simulation Name. See FS....
 BW_FILTER    = 'BW Filter'                # String Fujifilm's Simulation Name. See bwfilter

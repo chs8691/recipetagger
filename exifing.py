@@ -67,9 +67,9 @@ def map_color_chrome(value):
     match value:
         case 0:
             return CC.OFF
-        case 16:
-            return CC.WEAK
         case 32:
+            return CC.WEAK
+        case 64:
             return CC.STRONG
         
     return None
@@ -155,13 +155,13 @@ def map_whitebalance(value):
         case '0x300':
             return WB.FLUORESCENT1
         case '0x301':
-            return WB.FLUORESCENT1
-        case '0x302':
-            return WB.FLUORESCENT1
-        case '0x303':
             return WB.FLUORESCENT2
-        case '0x304':
+        case '0x302':
             return WB.FLUORESCENT3
+        case '0x303':
+            return None # Unsupported value
+        case '0x304':
+            return None # Unsupported value
         case '0x400':
             return WB.INCANDESENT
         case '0x500':
