@@ -8,17 +8,18 @@ import constants.drangepriority as DP
 import constants.dynamicrange as DR
 import constants.whitebalance as WB
 import constants.sensor as SR
+import constants.csvfields as CSV
 
 def extract_data(row):
     """Extract relevant fields for the imported recipe row and convert them into recipe format. Returns dict with recipe."""
     
-    field=''
+    field = ''
 
     # log(f'  {row}')
     recipe = dict()
 
 
-    field='Name'
+    field = CSV.NAME
     value = row[field].strip()
     if len(value) == 0:
         print(f'Recipe: Missing field: "{field}" - recipe will be ignored')
@@ -27,12 +28,12 @@ def extract_data(row):
     recipe[R.NAME] = value
     
 
-    field = 'Publisher'
+    field = CSV.PUBLISHER
     value = row[field].strip()
     recipe[R.PUBLISHER] = value
     
 
-    field='Film Simulation'
+    field = CSV.FILMSIMULATION
     value=row[field]
     
     recipe[R.FILMSIMULATION] = map_filmsimulation(value)
@@ -44,14 +45,14 @@ def extract_data(row):
 
     if recipe[R.FILMSIMULATION] == FS.ACROS or recipe[R.FILMSIMULATION] == FS.MONOCHROME:
 
-        field = 'BW Color WC'
+        field = CSV.BW_COLOR_WC
         if len(row[field]) > 0:
             value=int(row[field])
         else:
             value = 0
         recipe[R.BW_COLOR_WC] = value
 
-        field = 'BW Color MC'
+        field = CSV.BW_COLOR_MC
         if len(row[field]) > 0:
             value=int(row[field])
         else:
@@ -59,7 +60,7 @@ def extract_data(row):
         recipe[R.BW_COLOR_MC] = value
 
 
-    field = 'Grain Effect'
+    field = CSV.GRAIN_EFFECT
     value=row[field].upper().strip()
 
     if 'WEAK' in value and 'SMALL' in value:
@@ -74,7 +75,7 @@ def extract_data(row):
         recipe[R.GRAIN_EFFECT] = G.OFF
 
 
-    field = 'CCR Effect'
+    field = CSV.CCR_EFFECT
     value=row[field].upper().strip()
 
     if value == 'WEAK':
@@ -85,7 +86,7 @@ def extract_data(row):
         recipe[R.CCR_EFFECT] = CC.OFF
     
 
-    field = 'CCR FX Blue'
+    field = CSV.CCRFX_BLUE
     value=row[field].upper().strip()
 
     if value == 'WEAK':
@@ -96,7 +97,7 @@ def extract_data(row):
         recipe[R.CCRFX_BLUE] = CC.OFF
 
 
-    field='White Balance'            
+    field = CSV.WHITE_BALANCE           
     value=row[field].upper().replace('.','').replace(' ', '')
     if 'WHITEPRIORITY' in value:
         recipe[R.WHITE_BALANCE] = WB.WHITE_PRIORITY
@@ -113,21 +114,21 @@ def extract_data(row):
         recipe[R.WHITE_BALANCE] = WB.AUTO
 
 
-    field='White Balance R'            
+    field = CSV.WHITE_BALANCE_R          
     if len(row[field]) > 0:
         value=int(row[field])
     else:
         value = 0
     recipe[R.WHITE_BALANCE_R] = value
 
-    field='White Balance B'            
+    field = CSV.WHITE_BALANCE_B           
     if len(row[field]) > 0:
         value=int(row[field])
     else:
         value = 0
     recipe[R.WHITE_BALANCE_B] = value
 
-    field = 'Dynamic Range Priority'
+    field = CSV.DRANGE_PRIORITY
     value=row[field].upper().strip()
 
     if value == 'WEAK':
@@ -137,7 +138,7 @@ def extract_data(row):
     
     if R.DRANGE_PRIORITY not in recipe:
 
-        field = 'Dynamic Range'
+        field = CSV.DYNAMIC_RANGE
         value=row[field].upper()
 
         if '100' in value:
@@ -149,21 +150,21 @@ def extract_data(row):
         else:
             recipe[R.DYNAMIC_RANGE] = DR.AUTO
         
-        field = 'Highlights'
+        field = CSV.HIGHLIGHTS
         if len(row[field]) > 0:
             value=float(row[field])
         else:
             value = 0
         recipe[R.HIGHLIGHTS] = value
 
-        field = 'Shadows'
+        field = CSV.SHADOWS
         if len(row[field]) > 0:
             value=float(row[field])
         else:
             value = 0
         recipe[R.SHADOWS] = value
 
-    field = 'Sharpness'
+    field = CSV.SHARPNESS
     if len(row[field]) > 0:
         value=int(row[field])
     else:
@@ -173,42 +174,42 @@ def extract_data(row):
     if recipe[R.FILMSIMULATION] != FS.ACROS and \
         recipe[R.FILMSIMULATION] != FS.MONOCHROME:
    
-        field = 'Color'
+        field = CSV.COLOR
         if len(row[field]) > 0:
             value=int(row[field])
         else:
             value = 0
         recipe[R.COLOR] = value
 
-    field = 'High ISO NR'
+    field = CSV.HIGH_ISONR
     if len(row[field]) > 0:
         value=int(row[field])
     else:
         value = 0
     recipe[R.HIGH_ISONR] = value
 
-    field = 'Clarity'
+    field = CSV.CLARITY
     if len(row[field]) > 0:
         value=int(row[field])
     else:
         value = 0
     recipe[R.CLARITY] = value
 
-    field = 'ISO min'
+    field = CSV.ISO_MIN
     if len(row[field]) > 0:
         value=int(row[field])
     else:
         value = 0
     recipe[R.ISO_MIN] = value
 
-    field = 'ISO max'
+    field = CSV.ISO_MAX
     if len(row[field]) > 0:
         value=int(row[field])
     else:
         value = 0
     recipe[R.ISO_MAX] = value
 
-    field = 'X-Trans'
+    field = CSV.XTRANS_VERSION
     value=row[field].upper().strip()
 
     if 'III' == value:

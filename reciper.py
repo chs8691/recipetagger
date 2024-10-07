@@ -39,7 +39,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', help='Increase output verbosity.', action="store_true")
     parser.add_argument('-vv', '--vverbose', help='Increase output very verbosity.', action="store_true")
-    parser.add_argument('-r', '--recipies', type=str, nargs=1, default='reipies.csv',
+    parser.add_argument('-r', '--recipies', type=str, nargs=1, default='recipies.csv',
                         help='Update recipies from CSV file (Default: %(default)s) and store them in the internal Storage. See example file for columns names. ')
     parser.add_argument('-p', '--print', action='store_true',
                         help='Print result to console')
@@ -62,7 +62,7 @@ def import_recipies(filename):
         row_count = 0
         for row in spamreader:
             row_count += 1
-            # log(f'  {row}')
+            # log(f'import_recipies:  {row}')
             recipe = rp.extract_data(row)
 
             vvlog(recipe)
@@ -187,20 +187,30 @@ def read_file(filename):
 
 
 def find_recipe(exif, recipies):
-    
+    """"Create sorted result list."""
+
     res = []
     for r in recipies:
         res.append(check_recipe(exif, r))
 
+    res.sort(key=lambda a: a[0], reverse=True)
+    log('find_recipe()')
     log(res)
+
+    return res
 
 
 def check_recipe(exif, recipe):
     """ Compare image exifs data wth recipe's data to find differences and calculate a
         total score percentage value.
-        Returns tupel with two values:
+        Returns tuple with three values:
         - score pertance value (0..100)
-        - list with field names that doesn't match 100 %
+        - Name of the recipe
+        - list with four value tuple:
+          - score (0..99)
+          - Field name
+          - exif value
+          - recipe value
         Example: ( 90, [R.COLOR, R.SHARPNESS] )
         Every single score will be weightend between 0..10. For instance FILMSIMULATION
         is very important: weight=10
@@ -216,7 +226,7 @@ def check_recipe(exif, recipe):
     total += act * weight
     max_total += MAX * weight
     if act < MAX:
-        failed.append(field)
+        failed.append((act, field, exif[field], recipe[field]))
 
     field = R.GRAIN_EFFECT
     weight = 3
@@ -224,7 +234,7 @@ def check_recipe(exif, recipe):
     total += act * weight
     max_total += MAX * weight
     if act < MAX:
-        failed.append(field)
+        failed.append((act, field, exif[field], recipe[field]))
 
     field = R.CCR_EFFECT
     weight = 2
@@ -232,7 +242,7 @@ def check_recipe(exif, recipe):
     total += act * weight
     max_total += MAX * weight
     if act < MAX:
-        failed.append(field)
+        failed.append((act, field, exif[field], recipe[field]))
 
     field = R.CCRFX_BLUE
     weight = 2
@@ -240,7 +250,7 @@ def check_recipe(exif, recipe):
     total += act * weight
     max_total += MAX * weight
     if act < MAX:
-        failed.append(field)
+        failed.append((act, field, exif[field], recipe[field]))
 
     field = R.SHARPNESS
     weight = 1
@@ -248,7 +258,7 @@ def check_recipe(exif, recipe):
     total += act * weight
     max_total += MAX * weight
     if act < MAX:
-        failed.append(field)
+        failed.append((act, field, exif[field], recipe[field]))
 
     field = R.HIGH_ISONR
     weight = 2
@@ -256,7 +266,7 @@ def check_recipe(exif, recipe):
     total += act * weight
     max_total += MAX * weight
     if act < MAX:
-        failed.append(field)
+        failed.append((act, field, exif[field], recipe[field]))
 
     field = R.CLARITY
     weight = 5
@@ -264,7 +274,7 @@ def check_recipe(exif, recipe):
     total += act * weight
     max_total += MAX * weight
     if act < MAX:
-        failed.append(field)
+        failed.append((act, field, exif[field], recipe[field]))
 
 
     bws=[FS.ACROS, FS.MONOCHROME]
@@ -276,7 +286,7 @@ def check_recipe(exif, recipe):
         total += act * weight
         max_total += MAX * weight
         if act < MAX:
-            failed.append(field)
+            failed.append((act, field, exif[field], recipe[field]))
 
         field = R.BW_COLOR_MC
         weight = 1
@@ -284,23 +294,53 @@ def check_recipe(exif, recipe):
         total += act * weight
         max_total += MAX * weight
         if act < MAX:
-            failed.append(field)
+            failed.append((act, field, exif[field], recipe[field]))
 
-    elif exif[R.FILMSIMULATION] not in bws and recipe not in bws:
-
+    elif exif[R.FILMSIMULATION] not in bws and recipe[R.FILMSIMULATION] not in bws:
+        # print(f'CHECKER exif:{exif[R.FILMSIMULATION]}, recipe:{recipe[R.FILMSIMULATION]}')
         field = R.COLOR
         weight = 1
         act = rate_range(-4, +4, exif[field], recipe[field])
         total += act * weight
         max_total += MAX * weight
         if act < MAX:
-            failed.append(field)
+            failed.append((act, field, exif[field], recipe[field]))
 
-    # else
-    #  Was soll mit BW/Farbe passieren? 
+    # No points for film mismatch of Color and B/W comparison
+    else:
+        weight = 1
+        act = 0
+
+        exifval = None
+        recipeval = None
+        if field in exif:
+            exifval = exif[field]
+        if field in recipe:
+            recipeval = recipe[field]
+
+        field = R.COLOR
+        total += act * weight
+        max_total += MAX * weight
+        if act < MAX:
+            failed.append((act, field, exifval, recipeval))
+
+        field = R.BW_COLOR_WC
+        total += act * weight
+        max_total += MAX * weight
+        if act < MAX:
+            failed.append((act, field, exifval, recipeval))
+
+        field = R.BW_COLOR_MC
+        total += act * weight
+        max_total += MAX * weight
+        if act < MAX:
+            failed.append((act, field, exifval, recipeval))
 
 
-    return (100 / max_total * total, failed)
+    failed.sort(key=lambda a: a[0])
+
+    return (int(100 / max_total * total), recipe[R.NAME], failed)
+
 
 
 def grain_as_int(value):
@@ -374,6 +414,22 @@ def rate_fs(evalue, rvalue):
     
     return 0
 
+
+def report(res):
+
+    if len(res) == 0:
+        print('0')
+        return
+
+    print('Recipe match result')
+    item = res[0]
+    print(f'{item[1]} ({item[0]}%)')
+    for v in item[2]:
+        print(f'  {v[1]} ({v[0]}%)')
+        print(f'    EXIF  : {v[2]}')
+        print(f'    RECIPE: {v[3]}')
+
+
 def process():
     
     global recipies
@@ -382,9 +438,9 @@ def process():
 
     exif=read_file(args.filename[0])
 
-    find_recipe(exif, recipies)
+    res = find_recipe(exif, recipies)
 
-    
+    report(res)
 
 def main():
 

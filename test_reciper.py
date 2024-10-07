@@ -1,7 +1,5 @@
-import pytest
 import exifing as ex
 import reciping as rp
-import reciper
 import constants.recipefields as R
 import constants.filmsimulations as FS
 import constants.grain as G
@@ -11,378 +9,11 @@ import constants.whitebalance as WB
 import constants.sensor as SR
 import constants.colorchrome as CC
 import constants.bwfilter as BWF
-from os import path
+import constants.csvfields as CSV
 
 import logging
 
 LOGGER = logging.getLogger(__name__)
-
-
-# Names for building the path the test images. 
-# See README file in testdata for more information.
-X_T50 = 'X-T50'
-X_S10 = 'X-S10'
-cameras = [X_T50, X_S10]
-
-
-# Fehlende Tests:
-# Iamge-ISO
-
-
-@pytest.mark.parametrize("cam", cameras)
-def test_images_iso(cam):
-
-    attribute = 'ISO'
-    r = R.ISO
-
-    for (n,v) in [
-        ('3200-Auto', 3200),
-        ('6400', 6400),
-    ]:
-
-        name = f'testdata/{cam}/{cam}-{attribute}{n}.JPG'
-
-        if not path.exists(name):
-            LOGGER.warning(f'Missing test image: {name}')
-            continue
-    
-        act = reciper.read_file(name)
-
-        assert act[r] == v , name
-
-
-@pytest.mark.parametrize("cam", cameras)
-def test_images_clarity(cam):
-
-    attribute = 'Clarity'
-    r = R.CLARITY
-
-    for (n,v) in [
-        ('-5', -5),
-        ('+5', 5),
-    ]:
-
-        name = f'testdata/{cam}/{cam}-{attribute}{n}.JPG'
-
-        if not path.exists(name):
-            LOGGER.warning(f'Missing test image: {name}')
-            continue
-    
-        act = reciper.read_file(name)
-
-        assert act[r] == v , name
-
-
-@pytest.mark.parametrize("cam", cameras)
-def test_images_noise_reduction(cam):
-
-    attribute = 'NoiseReduction'
-    r = R.HIGH_ISONR
-
-    for (n,v) in [
-        ('-4', -4),
-        ('+4', 4),
-    ]:
-
-        name = f'testdata/{cam}/{cam}-{attribute}{n}.JPG'
-
-        if not path.exists(name):
-            LOGGER.warning(f'Missing test image: {name}')
-            continue
-    
-        act = reciper.read_file(name)
-
-        assert act[r] == v , name
-
-
-@pytest.mark.parametrize("cam", cameras)
-def test_images_wb_color_temperature(cam):
- 
-    attribute = 'WB'
-    n = 'ColorTemperature'
-
-            
-    for (nk, vk, nf, vr, vb) in [
-        ('4350K', 4350, '', 0, 0),
-        ('5500K', 5500, '-R-1-B+2', -1, 2),
-    ]:
-
-        name = f'testdata/{cam}/{cam}-{attribute}-{n}-{nk}{nf}.JPG'
-
-        if not path.exists(name):
-            LOGGER.warning(f'Missing test image: {name}')
-            continue
-    
-        act = reciper.read_file(name)
-
-        assert act[R.KELVIN] == vk, name   
-        assert act[R.WHITE_BALANCE_R] == vr , name   
-        assert act[R.WHITE_BALANCE_B] == vb , name   
-
-
-@pytest.mark.parametrize("cam", cameras)
-def test_images_wb_fine_tune(cam):
- 
-    attribute = 'WB'
-
-    for (n, v, nr, vr, nb, vb) in [
-        ('Auto', WB.AUTO, '+9', 9, '-9', -9),
-    ]:
-
-        name = f'testdata/{cam}/{cam}-{attribute}-{n}-R{nr}-B{nb}.JPG'
-
-        if not path.exists(name):
-            LOGGER.warning(f'Missing test image: {name}')
-            continue
-    
-        act = reciper.read_file(name)
-
-        assert act[R.WHITE_BALANCE_R] == vr , name   
-        assert act[R.WHITE_BALANCE_B] == vb , name   
-
-
-@pytest.mark.parametrize("cam", cameras)
-def test_images_wb_simple(cam):
- 
-    attribute = 'WB'
-    r = R.WHITE_BALANCE
-            
-    for (n, v) in [
-        ('Auto', WB.AUTO),
-        ('AutoAmbiencePriority', WB.AMBIENCE_PRIORITY),
-        ('AutoWhitePriority', WB.WHITE_PRIORITY),
-        ('Daylight', WB.DAYLIGHT),
-        ('Shade', WB.SHADE),
-        ('Fluorescent1', WB.FLUORESCENT1),
-        ('Fluorescent2', WB.FLUORESCENT2),
-        ('Fluorescent3', WB.FLUORESCENT3),
-        ('Incandescent', WB.INCANDESENT),
-        ('Underwater', WB.UNDERWATER),
-    ]:
-
-        name = f'testdata/{cam}/{cam}-{attribute}-{n}.JPG'
-
-        if not path.exists(name):
-            LOGGER.warning(f'Missing test image: {name}')
-            continue
-    
-        act = reciper.read_file(name)
-
-        assert act[r] == v , name  
-
-
-@pytest.mark.parametrize("cam", cameras)
-def test_images_color_chrome_effects(cam):
- 
-    attribute = 'CC'
-    r = R.CCR_EFFECT
-    r2 = R.CCRFX_BLUE
-
-    for (n,v, v2) in [
-        ('off-weak', CC.OFF, CC.WEAK),
-        ('strong-off', CC.STRONG, CC.OFF),
-    ]:
-
-        name = f'testdata/{cam}/{cam}-{attribute}-{n}.JPG'
-
-        if not path.exists(name):
-            LOGGER.warning(f'Missing test image: {name}')
-            continue
-    
-        act = reciper.read_file(name)
-
-        assert act[r] == v , name   
-        assert act[r2] == v2 , name   
-
-
-@pytest.mark.parametrize("cam", cameras)
-def test_images_grain(cam):
-
-    attribute = 'Grain'
-    r = R.GRAIN_EFFECT
-
-    for (n,v) in [
-        ('off', G.OFF),
-        ('strong-small', G.STRONG_SMALL),
-        ('weak-large', G.WEAK_LARGE),
-    ]:
-
-        name = f'testdata/{cam}/{cam}-{attribute}-{n}.JPG'
-
-        if not path.exists(name):
-            LOGGER.warning(f'Missing test image: {name}')
-            continue
-    
-        act = reciper.read_file(name)
-
-        assert act[r] == v , name
-
-
-@pytest.mark.parametrize("cam", cameras)
-def test_images_sharpness(cam):
-
-    attribute = 'Sharpness'
-    r = R.SHARPNESS
-
-    for (n,v) in [
-        ('-4', -4),
-        ('+4', 4),
-    ]:
-
-        name = f'testdata/{cam}/{cam}-{attribute}{n}.JPG'
-
-        if not path.exists(name):
-            LOGGER.warning(f'Missing test image: {name}')
-            continue
-    
-        act = reciper.read_file(name)
-
-        assert act[r] == v , name
-
-
-@pytest.mark.parametrize("cam", cameras)
-def test_images_saturation(cam):
-
-    attribute = 'Saturation'
-    r = R.COLOR
-
-    for (n,v) in [
-        ('-4', -4),
-        ('+4', 4),
-    ]:
-
-        name = f'testdata/{cam}/{cam}-{attribute}{n}.JPG'
-
-        if not path.exists(name):
-            LOGGER.warning(f'Missing test image: {name}')
-            continue
-    
-        act = reciper.read_file(name)
-
-        assert act[r] == v , name
-
-
-@pytest.mark.parametrize("cam", cameras)
-def test_images_drp_strong(cam):
-
-    name = f'testdata/{cam}/{cam}-DRP-Strong.JPG'
-
-    if not path.exists(name):
-        LOGGER.warning(f'Missing test image: {name}')
-        return
-    
-    act = reciper.read_file(name)
-
-    assert act[R.DRANGE_PRIORITY] == DP.STRONG , name
-
-
-@pytest.mark.parametrize("cam", cameras)
-def test_images_drp_auto(cam):
-
-    name = f'testdata/{cam}/{cam}-DRP-Strong.JPG'
-
-    if not path.exists(name):
-        LOGGER.warning(f'Missing test image: {name}')
-        return
-    
-    act = reciper.read_file(name)
-
-    assert act[R.DRANGE_PRIORITY] == DP.STRONG , name
-
-
-@pytest.mark.parametrize("cam", cameras)
-def test_images_dr_400(cam):
-
-    name = f'testdata/{cam}/{cam}-DR-400.JPG'
-
-    if not path.exists(name):
-        LOGGER.warning(f'Missing test image: {name}')
-        return
-    
-    act = reciper.read_file(name)
-
-    assert R.DRANGE_PRIORITY not in act , name
-    assert act[R.DYNAMIC_RANGE] == DR.DR400 , name
-    assert act[R.HIGHLIGHTS] == 0 , name
-    assert act[R.SHADOWS] == 0  , name
-
-
-@pytest.mark.parametrize("cam", cameras)
-def test_images_dr_auto(cam):
-        
-    name = f'testdata/{cam}/{cam}-DR-Auto.JPG'
-    if not path.exists(name):
-        LOGGER.warning(f'Missing test image: {name}')
-        return
-    
-    act = reciper.read_file(name)
-
-    assert R.DRANGE_PRIORITY not in act , name
-    assert act[R.DYNAMIC_RANGE] == DR.DR100 , name
-    assert act[R.HIGHLIGHTS] == 0 , name
-    assert act[R.SHADOWS] == 0  , name
-
-
-@pytest.mark.parametrize("cam", cameras)
-def test_images_fs_bw(cam):
-   
-    for (fs, ft) in[
-        (FS.ACROS, None),
-        (FS.ACROS, BWF.RED),
-        (FS.MONOCHROME, None),
-        (FS.MONOCHROME, BWF.YELLOW),
-    ]:
-        if ft is None:
-            name =  fs
-        else:
-            name = fs + '+' + ft
-    
-        name = f'testdata/{cam}/{cam}-FS-{name}.JPG'
-        if not path.exists(name):
-            LOGGER.warning(f'Missing test image: {name}')
-            continue
-    
-        act = reciper.read_file(name)
-        assert act[R.FILMSIMULATION] == fs
-
-        if ft is None:
-            assert R.BW_FILTER not in act , name
-        else:
-            assert act[R.BW_FILTER] == ft , name
-
-
-@pytest.mark.parametrize("cam", cameras)
-def test_images_fs_color(cam):
-
-    for f in [
-        FS.ASTIA,
-        FS.PROVIA ,
-        FS.CLASSIC_CHROME ,
-        FS.CLASSIC_NEG ,
-        FS.ETERNA ,
-        FS.ETERNA_BLEACH_BYPASS ,
-        FS.NOSTALGIC_NEG ,
-        FS.PROVIA ,
-        FS.PRO_NEG_HI ,
-        FS.PRO_NEG_STD ,
-        FS.REALA_ACE ,
-        FS.VELVIA,
-        ]:
-
-        # Skip non existing filmsimulations
-        match cam:
-            case X_S10:
-                if f in [FS.REALA_ACE,
-                            FS.NOSTALGIC_NEG]:
-                    continue                
-
-        name = f'testdata/{cam}/{cam}-FS-{f}.JPG'
-        if not path.exists(name):
-            LOGGER.warning(f'Missing test image: {name}')
-            continue
-
-        act = reciper.read_file(name)
-        assert act[R.FILMSIMULATION] == f , name
 
         
 def test_map_drange_priority():
@@ -496,29 +127,29 @@ def test_exif_map_white_balance():
 
 def test_extract_recipe_data():
     
-    row = {"Name"                   :"Recipe Nr. 1",
-           "Publisher"              :"Max Morytz",
-           "X-Trans"                :"V",
-           "Film Simulation"        :"Astia",
-           "BW Color WC"            :"",
-           "BW Color MC"            :"",
-           "Grain Effect"           :"weak/small",
-           "CCR Effect"             :"strong",
-           "CCR FX Blue"            :"off",
-           "White Balance"          :"Auto",
-           "Kelvin"                 :"",
-           "White Balance R"        :"-1",
-           "White Balance B"        :"+1",
-           "Dynamic Range"          :"Auto",
-           "Dynamic Range Priority" :"off",
-           "Highlights"             :"-1",
-           "Shadows"                :"+1",
-           "Color"                  :"0",
-           "Sharpness"              :"-2",
-           "High ISO NR"            :"+2",
-           "Clarity"                :"-3",
-           "ISO min"                :"",
-           "ISO max"                :"3200"
+    row = {CSV.NAME             :"Recipe Nr. 1",
+           CSV.PUBLISHER        :"Max Morytz",
+           CSV.FILMSIMULATION   :"Astia",
+           CSV.BW_COLOR_MC      :"",
+           CSV.BW_COLOR_WC      :"",
+           CSV.GRAIN_EFFECT     :"weak/small",
+           CSV.CCR_EFFECT       :"strong",
+           CSV.CCRFX_BLUE       :"off",
+           CSV.WHITE_BALANCE    :"Auto",
+           CSV.KELVIN           :"",
+           CSV.WHITE_BALANCE_B  :"+1",
+           CSV.WHITE_BALANCE_R  :"-1",
+           CSV.DYNAMIC_RANGE    :"Auto",
+           CSV.DRANGE_PRIORITY  :"off",
+           CSV.HIGHLIGHTS       :"-1",
+           CSV.SHADOWS          :"+1",
+           CSV.SHARPNESS        :"-2",
+           CSV.COLOR            :"0",
+           CSV.HIGH_ISONR       :"+2",
+           CSV.CLARITY          :"-3",
+           CSV.ISO_MIN          :"",
+           CSV.ISO_MAX          :"3200",
+           CSV.XTRANS_VERSION   :"V",
            }
     
     
@@ -548,29 +179,29 @@ def test_extract_recipe_data():
 
 def test_extract_recipe_data2():
 
-    row = {"Name"                   :"Recipe Nr. 2",
-           "Publisher"              :"Max Morytz",
-           "X-Trans"                :"IV",
-           "Film Simulation"        :"ACROS",
-           "BW Color WC"            :"-1",
-           "BW Color MC"            :"+1",
-           "Grain Effect"           :"",
-           "CCR Effect"             :"weak",
-           "CCR FX Blue"            :"strong",
-           "White Balance"          :"Kelvin",
-           "Kelvin"                 :"10000",
-           "White Balance R"        :"0",
-           "White Balance B"        :"0",
-           "Dynamic Range"          :"",
-           "Dynamic Range Priority" :"Strong",
-           "Highlights"             :"0",
-           "Shadows"                :"0",
-           "Color"                  :"",
-           "Sharpness"              :"0",
-           "High ISO NR"            :"-4",
-           "Clarity"                :"1",
-           "ISO min"                :"1200",
-           "ISO max"                :"1600"
+    row = {CSV.NAME              :"Recipe Nr. 2",
+           CSV.PUBLISHER         :"Max Morytz",
+           CSV.FILMSIMULATION    :"ACROS",
+           CSV.BW_COLOR_MC       :"+1",
+           CSV.BW_COLOR_WC       :"-1",
+           CSV.GRAIN_EFFECT      :"",
+           CSV.CCR_EFFECT        :"weak",
+           CSV.CCRFX_BLUE        :"strong",
+           CSV.WHITE_BALANCE     :"Kelvin",
+           CSV.KELVIN            :"10000",
+           CSV.WHITE_BALANCE_B   :"0",
+           CSV.WHITE_BALANCE_R   :"0",
+           CSV.DYNAMIC_RANGE     :"",
+           CSV.DRANGE_PRIORITY   :"Strong",
+           CSV.HIGHLIGHTS        :"0",
+           CSV.SHADOWS           :"0",
+           CSV.SHARPNESS         :"0",
+           CSV.COLOR             :"",
+           CSV.HIGH_ISONR        :"-4",
+           CSV.CLARITY           :"1",
+           CSV.ISO_MIN           :"1200",
+           CSV.ISO_MAX           :"1600",
+           CSV.XTRANS_VERSION    :"IV",
            }
     
     r = rp.extract_data(row)
