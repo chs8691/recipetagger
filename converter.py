@@ -1,5 +1,5 @@
-# Simple tool to convert recipies file from a properitary csv to the reciper's csv file format. Can be used as template for other converter.
-# The created csv file is ready to import in recipies.py
+# Simple tool to convert recipes file from a properitary csv to the reciper's csv file format. Can be used as template for other converter.
+# The created csv file is ready to import in recipes.py
 # Import CSV may not have spaces before or after the column values.
 import argparse
 import csv
@@ -66,7 +66,7 @@ def main():
     all = []
 
     with open(args.input, newline='') as rfile:
-        with open('recipies.csv', 'w', newline='') as wfile:
+        with open('recipes.csv', 'w', newline='') as wfile:
             spamreader = csv.DictReader(rfile, delimiter=',', quotechar='"')
             spamwriter = csv.writer(wfile, delimiter=',',
                                     quotechar='"', quoting=csv.QUOTE_ALL)
@@ -83,10 +83,10 @@ def main():
 def parse_args():
     global args
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input', type=str, nargs=1, default='import/X-Recipies.csv',
+    parser.add_argument('-i', '--input', type=str, nargs=1, default='import/X-Recipes.csv',
                         help='Input CSV file (Default: %(default)s).')
 
-    parser.add_argument('-o', '--output', type=str, nargs=1, default='recipies.csv',
+    parser.add_argument('-o', '--output', type=str, nargs=1, default='recipes.csv',
                         help='Output CSV file (Default: %(default)s).')
 
     args = parser.parse_args()

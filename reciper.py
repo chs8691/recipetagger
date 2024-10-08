@@ -7,13 +7,15 @@ import constants.whitebalance as WB
 import constants.filmsimulations as FS
 import constants.grain as GR
 import constants.colorchrome as CC
+from os import path
+from os import listdir
 
 # exiftool must be installed on the system
 from exiftool import ExifToolHelper
 
 args=None
 
-recipies = [] 
+recipes = [] 
 
 def log(message):
     """Logs to console in verbose mode"""
@@ -39,22 +41,22 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', help='Increase output verbosity.', action="store_true")
     parser.add_argument('-vv', '--vverbose', help='Increase output very verbosity.', action="store_true")
-    parser.add_argument('-r', '--recipies', type=str, nargs=1, default='recipies.csv',
-                        help='Update recipies from CSV file (Default: %(default)s) and store them in the internal Storage. See example file for columns names. ')
+    parser.add_argument('-r', '--recipes', type=str, nargs=1, default='recipes.csv',
+                        help='Update recipes from CSV file (Default: %(default)s) and store them in the internal Storage. See example file for columns names. ')
     parser.add_argument('-p', '--print', action='store_true',
                         help='Print result to console')
-    parser.add_argument('filename', metavar='FILENAME', type=str, nargs=1,
-                    help='Image file name')
+    parser.add_argument('path', metavar='PATH', type=str, nargs=1,
+                    help='Path to image file(s). Only JPG files will be processed. Can be a directory or a single file name. Wildcards are not supported.')
     
     args = parser.parse_args()
 
 
-def import_recipies(filename):
-    """CSV file import from CSV file. Returns list with recipies"""
+def import_recipes(filename):
+    """CSV file import from CSV file. Returns list with recipes"""
     
-    log(f'Importing recipies from {filename}')
+    log(f'Importing recipes from {filename}')
 
-    recipies = []
+    recipes = []
 
     with open(filename, newline='') as csvfile:
         spamreader = csv.DictReader(csvfile, delimiter=',', quotechar='"')
@@ -62,23 +64,24 @@ def import_recipies(filename):
         row_count = 0
         for row in spamreader:
             row_count += 1
-            # log(f'import_recipies:  {row}')
+            # log(f'import_recipes:  {row}')
             recipe = rp.extract_data(row)
 
             vvlog(recipe)
-            recipies.append(recipe)
+            recipes.append(recipe)
 
 
-    print(f'{len(recipies)}/{row_count} recipies imported.')
+    print(f'{len(recipes)}/{row_count} recipes imported.')
 
-    return recipies
+    return recipes
 
 
 
 
 def read_file(filename):
     """Works for Fujifilm X-T50. Returns dictionary with all recipe fields.
-    Returns None in error case. """
+    Returns None in error case. 
+    """
     log(f'Readin Image file {filename}')
 
     exif = dict()
@@ -139,7 +142,10 @@ def read_file(filename):
             if(exif[R.WHITE_BALANCE] == WB.KELVIN):           
                 exif[R.KELVIN] = d[field]
     
-            field='MakerNotes:WhiteBalanceFineTune'   
+            field='MakerNotes:WhiteBalanceFineTune'
+            if field not in d:
+                log(f'ERROR Field {field} not found.')
+                return None
             (value, value2) = ex.map_wb_finetune(d[field])
             exif[R.WHITE_BALANCE_R] = value
             exif[R.WHITE_BALANCE_B] = value2
@@ -165,7 +171,7 @@ def read_file(filename):
                     field2='MakerNotes:DevelopmentDynamicRange'
                     exif[R.DYNAMIC_RANGE] = ex.map_dynamic_range(d[field2])
                 else:
-                    print(f'Unknown value for {field}: {d[field]}')
+                    print(f'ERROR Unknown value for {field}: {d[field]}')
                     return None
                 
                 field='MakerNotes:HighlightTone'
@@ -186,18 +192,23 @@ def read_file(filename):
     return exif
 
 
-def find_recipe(exif, recipies):
-    """"Create sorted result list."""
+def find_recipe(exif, recipes):
+    """"Create sorted result list. Return None in error case."""
 
-    res = []
-    for r in recipies:
-        res.append(check_recipe(exif, r))
+    results = []
+    for r in recipes:
+        res = check_recipe(exif, r)
+        if res is not None:
+            results.append(res)
+        else:
+            log('ERROR check_recipe() returned \'None\'.')
+            return None
 
-    res.sort(key=lambda a: a[0], reverse=True)
+    results.sort(key=lambda a: a[0], reverse=True)
     log('find_recipe()')
-    log(res)
+    log(results)
 
-    return res
+    return results
 
 
 def check_recipe(exif, recipe):
@@ -219,6 +230,10 @@ def check_recipe(exif, recipe):
     total = 0
     max_total = 0
     MAX = 100
+
+    if exif is None:
+        log('ERROR exif is \'None\'.')
+        return None
 
     field = R.FILMSIMULATION
     weight = 10
@@ -415,32 +430,78 @@ def rate_fs(evalue, rvalue):
     return 0
 
 
-def report(res):
+def report(filename, res):
+    """Print result to the console.
+    res: Ascending list of rated recipes.
+    """
+    
+    print(f'\n{path.basename(filename)}')
 
     if len(res) == 0:
-        print('0')
+        print('  No match found :o(')
         return
 
-    print('Recipe match result')
     item = res[0]
-    print(f'{item[1]} ({item[0]}%)')
-    for v in item[2]:
-        print(f'  {v[1]} ({v[0]}%)')
-        print(f'    EXIF  : {v[2]}')
-        print(f'    RECIPE: {v[3]}')
 
+    if item[0] == 100:
+        print(f'   Complete fitting recipe: {item[1]}')
+        return
+
+    print('   Best fitting recipe ({:2d}%) and the image\'s deviation settings:'.format(item[0]))
+    print('   {}'.format(item[1]))
+    for v in item[2]:
+        print('    {:18s}: {:18s} {:18s} {:2d}%'.format(str(v[1]), str(v[2]), f'({str(v[3])})', v[0]))
+
+
+def get_image_files(pathto):
+    """ Returns list with all JPG file names for the given path (without subdirectories).
+    """
+
+    if path.isdir(pathto):
+        log(f'Directory found: {pathto}')
+        files = [path.join(pathto, each) for each in listdir(pathto) if each.upper().endswith('.JPG')]
+        if len(files) > 0:
+            log(f'Found JPG files: {len(files)}')
+            return files
+        else:
+            exit(f'No JPG files found in: {pathto}')
+        
+    elif path.isfile(pathto) and pathto.upper().endswith('.JPG'):
+        log(f'Found single JPG file: {pathto}')
+        return [pathto]
+    
+    else:
+        exit(f'Neither an image file nor a path: {pathto}')
 
 def process():
     
-    global recipies
+    global recipes
 
-    recipies = import_recipies(args.recipies[0])
+    total = 0
+    err = 0
 
-    exif=read_file(args.filename[0])
+    recipes = import_recipes(args.recipes)
 
-    res = find_recipe(exif, recipies)
+    files = get_image_files(args.path[0])
 
-    report(res)
+    for f in files:
+        total += 1
+        log(f'Processing {f}')
+        exif=read_file(f)
+
+        res = find_recipe(exif, recipes)
+        if res == None:
+            err += 1
+            print(f'\nERROR Skipping image, maybe of insufficient exif data: {path.basename(f)}')
+            continue
+
+        report(f, res)
+
+    if err == 0:
+        print(f'\nProcessed all {total} image(s) successfully.')
+    else:
+        print(f'\nProcessed {total} image(s), but skipped {err} with error!')
+
 
 def main():
 
