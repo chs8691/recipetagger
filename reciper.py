@@ -7,11 +7,13 @@ import constants.whitebalance as WB
 import constants.filmsimulations as FS
 import constants.grain as GR
 import constants.colorchrome as CC
+import constants.sensor as SR
 from os import path
 from os import listdir
+import subprocess
 
 # exiftool must be installed on the system
-from exiftool import ExifToolHelper
+from exiftool import ExifToolHelper, ExifTool 
 
 args=None
 
@@ -45,6 +47,8 @@ def parse_args():
                         help='Update recipes from CSV file (Default: %(default)s) and store them in the internal Storage. See example file for columns names. ')
     parser.add_argument('-p', '--print', action='store_true',
                         help='Print result to console')
+    parser.add_argument('-d', '--description', action='store_true',
+                        help='Insert result into image description')
     parser.add_argument('path', metavar='PATH', type=str, nargs=1,
                     help='Path to image file(s). Only JPG files will be processed. Can be a directory or a single file name. Wildcards are not supported.')
     
@@ -143,12 +147,12 @@ def read_file(filename):
                 exif[R.KELVIN] = d[field]
     
             field='MakerNotes:WhiteBalanceFineTune'
-            if field not in d:
-                log(f'ERROR Field {field} not found.')
-                return None
-            (value, value2) = ex.map_wb_finetune(d[field])
-            exif[R.WHITE_BALANCE_R] = value
-            exif[R.WHITE_BALANCE_B] = value2
+            if field in d:
+                (value, value2) = ex.map_wb_finetune(d[field])
+                exif[R.WHITE_BALANCE_R] = value
+                exif[R.WHITE_BALANCE_B] = value2
+            else:
+                log(f'WARN Field {field} not found. This is normal if the image is shot in automatic mode.')
 
             field='MakerNotes:DRangePriority' # Auto (0) or Fixed (1)
 
@@ -188,6 +192,9 @@ def read_file(filename):
             field='EXIF:ISO'
             exif[R.ISO]=d[field]
 
+            field='EXIF:Model'
+            exif[R.XTRANS_VERSION]=ex.get_sensor(d[field])
+
         log(exif)
     return exif
 
@@ -215,14 +222,14 @@ def check_recipe(exif, recipe):
     """ Compare image exifs data wth recipe's data to find differences and calculate a
         total score percentage value.
         Returns tuple with three values:
-        - score pertance value (0..100)
+        - score percetange value (0..100)
         - Name of the recipe
         - list with four value tuple:
           - score (0..99)
           - Field name
           - exif value
           - recipe value
-        Example: ( 90, [R.COLOR, R.SHARPNESS] )
+        Example: ( 90, 'Recipe No. 1', [(10, R.COLOR, 2, -2)] )
         Every single score will be weightend between 0..10. For instance FILMSIMULATION
         is very important: weight=10
     """
@@ -293,7 +300,7 @@ def check_recipe(exif, recipe):
 
 
     bws=[FS.ACROS, FS.MONOCHROME]
-    if exif[R.FILMSIMULATION] in bws and recipe in bws:
+    if exif[R.FILMSIMULATION] in bws and recipe[R.FILMSIMULATION] in bws:
 
         field = R.BW_COLOR_WC
         weight = 1
@@ -352,6 +359,16 @@ def check_recipe(exif, recipe):
             failed.append((act, field, exifval, recipeval))
 
 
+    field = R.XTRANS_VERSION
+    weight = 2
+    # Increase max value for new sensor generations
+    act =  rate_range(1, 5, sensor_as_int(exif[field]), sensor_as_int(recipe[field]))
+    total += act * weight
+    max_total += MAX * weight
+    if act < MAX:
+        failed.append((act, field, exif[field], recipe[field]))
+
+
     failed.sort(key=lambda a: a[0])
 
     return (int(100 / max_total * total), recipe[R.NAME], failed)
@@ -375,6 +392,28 @@ def grain_as_int(value):
         return 4
 
     return 0
+
+
+def sensor_as_int(value):
+    """Interprates sensor value as integer for better compareness.
+    Return interger 1 (First generation) .. 5 (X Trans V) or None in error case
+    Enhance this method for every new sensor.
+    """
+        
+    match value:
+        case SR.X_I:
+            return 1
+        case SR.X_II:
+            return 2
+        case SR.X_III:
+            return 3
+        case SR.X_IV:
+            return 4
+        case SR.X_V:
+            return 5
+    
+
+    return None
 
 
 def cc_as_int(value):
@@ -429,6 +468,60 @@ def rate_fs(evalue, rvalue):
     
     return 0
 
+
+def update_description(filename, res):
+    """Update description in the image file
+    res: Ascending list of rated recipes.
+    To show it i digikam the text will be saved in multiple fields, but without language association.
+    """
+    
+    print(f'\n{path.basename(filename)}')
+
+    if len(res) == 0:
+        print('  No match found :o(')
+        return
+
+    item = res[0]
+
+    if item[0] == 100:
+        print(f'   Complete fitting recipe: {item[1]}')
+        return
+    
+    # TODO Wie bekommt man nun eine Mehrzeilige Beschriftung hin? Und wieso sieht man es nicht in Digikam. Language?
+
+    lines = []
+    lines.append('--- Best fitting recipe ({:2d}%) and the image its deviation settings:'.format(item[0]))
+    lines.append('{}.'.format(item[1]))
+    for v in item[2]:
+        lines.append('    {:s}: {:s} {:s}'.format(str(v[1]), str(v[2]), f'({str(v[3])})'))
+
+
+    # with tempfile.TemporaryFile() as fp:
+    #     fp.write(d.encode('ascii'))
+    #     descr=fp.read
+    descr = ' '.join(lines)
+    # descr = '''a
+    # b'''
+
+    descr = '''nr3
+    nr4'''
+    print('description=' + descr)
+
+    ret = subprocess.run(["exiftool", f"-imagedescription={descr}", f"{filename}"])
+    print(f"returncode={ret.returncode}")
+
+    # with ExifTool() as ex:
+    #     # ex.execute("-escapeC", f"-imagedescription={descr}", ÷  f"{filename}")
+    #     ex.execute( f"-imagedescription={descr}",   f"{filename}")
+
+    # with ExifToolHelper() as et:
+    #     et.set_tags(files=[filename], tags={"imagedescription": descr}, params="-escapeC")
+    # with ExifToolHelper() as et:
+    #     et.set_tags(files=[filename], tags={"exif:ImageDescription": descr})
+    # with ExifToolHelper() as et:
+    #     et.set_tags(files=[filename], tags={"XMP:ImageDescription": descr})
+    # with ExifToolHelper() as et:
+    #     et.set_tags(files=[filename], tags={"XMP:Description": descr})
 
 def report(filename, res):
     """Print result to the console.
@@ -495,7 +588,11 @@ def process():
             print(f'\nERROR Skipping image, maybe of insufficient exif data: {path.basename(f)}')
             continue
 
-        report(f, res)
+        if args.print:
+            report(f, res)
+
+        if args.description:
+            update_description(f, res)
 
     if err == 0:
         print(f'\nProcessed all {total} image(s) successfully.')

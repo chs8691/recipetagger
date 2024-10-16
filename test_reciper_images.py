@@ -23,6 +23,22 @@ X_T50 = 'X-T50'
 X_S10 = 'X-S10'
 cameras = [X_T50, X_S10]
 
+@pytest.mark.parametrize("cam", cameras)
+def test_images_sensor(cam):
+        
+    name = f'testdata/{cam}/{cam}-Automodus.JPG'
+    if not path.exists(name):
+        LOGGER.warning(f'Missing test image: {name}')
+        return
+    
+    act = reciper.read_file(name)
+
+    match cam:
+        case 'X-T50':
+            assert act[R.XTRANS_VERSION] == SR.X_V, name
+        case 'X-S10':
+            assert act[R.XTRANS_VERSION] == SR.X_IV, name
+
 
 @pytest.mark.parametrize("cam", cameras)
 def test_images_iso(cam):
@@ -302,6 +318,7 @@ def test_images_dr_400(cam):
     assert act[R.SHADOWS] == 0  , name
 
 
+
 @pytest.mark.parametrize("cam", cameras)
 def test_images_dr_auto(cam):
         
@@ -316,7 +333,6 @@ def test_images_dr_auto(cam):
     assert act[R.DYNAMIC_RANGE] == DR.DR100 , name
     assert act[R.HIGHLIGHTS] == 0 , name
     assert act[R.SHADOWS] == 0  , name
-
 
 @pytest.mark.parametrize("cam", cameras)
 def test_images_fs_bw(cam):

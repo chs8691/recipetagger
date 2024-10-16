@@ -1,16 +1,9 @@
-import pytest
-import exifing as ex
-import reciping as rp
 import reciper
 import constants.recipefields as R
 import constants.filmsimulations as FS
 import constants.grain as GR
-import constants.dynamicrange as DR
-import constants.drangepriority as DP
-import constants.whitebalance as WB
-import constants.sensor as SR
 import constants.colorchrome as CC
-import constants.bwfilter as BWF
+import constants.sensor as SR
 
 import logging
 
@@ -20,6 +13,7 @@ LOGGER = logging.getLogger(__name__)
 def test_check_recpipe_full_match_color():
 
     recipe = { 
+        R.NAME:'RECIPE No. 1',
         R.FILMSIMULATION:FS.REALA_ACE, 
         R.GRAIN_EFFECT:GR.OFF,
         R.CCR_EFFECT:CC.OFF,
@@ -28,6 +22,7 @@ def test_check_recpipe_full_match_color():
         R.SHARPNESS:-1,
         R.HIGH_ISONR:-1,
         R.CLARITY:-1,
+        R.XTRANS_VERSION:SR.X_V,
         }
     
     exif = {
@@ -39,17 +34,20 @@ def test_check_recpipe_full_match_color():
         R.SHARPNESS:-1,
         R.HIGH_ISONR:-1,
         R.CLARITY:-1,
+        R.XTRANS_VERSION:SR.X_V,
         }
 
-    (perc, fields) = reciper.check_recipe(exif, recipe)
+    (perc, name, result) = reciper.check_recipe(exif, recipe)
 
     assert perc == 100
-    assert len(fields) == 0
+    assert name == 'RECIPE No. 1'
+    assert len(result) == 0
 
 
 def test_check_recpipe_full_match_monochromatic():
 
     recipe = { 
+        R.NAME:'RECIPE No. 2',
         R.FILMSIMULATION:FS.ACROS, 
         R.GRAIN_EFFECT:GR.STRONG_LARGE,
         R.CCR_EFFECT:CC.OFF,
@@ -59,6 +57,7 @@ def test_check_recpipe_full_match_monochromatic():
         R.SHARPNESS:-1,
         R.HIGH_ISONR:-1,
         R.CLARITY:-1,
+        R.XTRANS_VERSION:SR.X_V,
         }
     
     exif = {
@@ -71,17 +70,20 @@ def test_check_recpipe_full_match_monochromatic():
         R.SHARPNESS:-1,
         R.HIGH_ISONR:-1,
         R.CLARITY:-1,
+        R.XTRANS_VERSION:SR.X_V,
         }
 
-    (perc, fields) = reciper.check_recipe(exif, recipe)
+    (perc, name, result) = reciper.check_recipe(exif, recipe)
 
     assert perc == 100
-    assert len(fields) == 0
+    assert name == 'RECIPE No. 2'
+    assert len(result) == 0
 
 
 def test_check_recpipe_failed_fields_color():
 
     recipe = { 
+        R.NAME:'RECIPE No. 3',
         R.FILMSIMULATION:FS.REALA_ACE, 
         R.GRAIN_EFFECT:GR.WEAK_LARGE,
         R.CCR_EFFECT:CC.OFF,
@@ -90,6 +92,7 @@ def test_check_recpipe_failed_fields_color():
         R.SHARPNESS:0,
         R.HIGH_ISONR:0,
         R.CLARITY:0,
+        R.XTRANS_VERSION:SR.X_V,
         }
     
     exif = {
@@ -101,9 +104,11 @@ def test_check_recpipe_failed_fields_color():
         R.SHARPNESS:1,
         R.HIGH_ISONR:1,
         R.CLARITY:1,
+        R.XTRANS_VERSION:SR.X_I,
         }
 
-    (perc, fields) = reciper.check_recipe(exif, recipe)
+    (perc, name, result) = reciper.check_recipe(exif, recipe)
+    fields = [i[1] for i in result]
 
     assert R.FILMSIMULATION in fields
     assert R.GRAIN_EFFECT in fields
@@ -113,4 +118,5 @@ def test_check_recpipe_failed_fields_color():
     assert R.SHARPNESS in fields
     assert R.HIGH_ISONR in fields
     assert R.CLARITY in fields
+    assert R.XTRANS_VERSION in fields
 

@@ -16,6 +16,34 @@ import constants.colorchrome as CC
 import constants.filmsimulations as FS
 import constants.drangepriority as DP
 import constants.bwfilter as BWF
+import constants.sensor as SR
+
+def get_sensor(model):
+    """Returns X Trans Version for the given camera or in error case, None.
+
+    New cameras must be added here to be supported by the script.
+    The model name can be read from exif data with tag `model`, for instance:
+
+    ```
+      exiftool -Model testdata/X-T50/X-T50-FS-MONOCHROME.JPG
+      Camera Model Name               : X-T50
+    ```
+      
+    Exif value is a String.
+    """
+    match model.upper():
+        case 'X-T50' | 'X-T5' | 'X100VI' | 'X-T5' | 'X-H2'  | 'X-H2S' :
+            return SR.X_V
+        case 'X-S10' | 'X-T3' | 'X-T4' | 'X-T30' | 'X-T30 II' | 'X-PRO3' | 'X100V' | 'X-S20' | 'X-E4':
+            return SR.X_IV
+        case 'X-PRO2' | 'X-T2' | 'X-X100F' | 'X-T20' | 'X-E3' | 'X-H1':
+            return SR.X_III
+        case 'X-100S' | 'X-E2' | 'X-T1' | 'X-100T' | 'X-T10' | 'X-E2S' | 'X70':
+            return SR.X_II
+        case 'X-PRO1' | 'X-E1' | 'X-M1':
+            return SR.X_I
+
+    return None
 
 
 def map_wb_finetune(values):
