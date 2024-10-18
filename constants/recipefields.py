@@ -3,6 +3,7 @@
 
 NAME  = 'Name'                            # Recipe name or file name 
 PUBLISHER  = 'Publisher'                  # Publisher, String.  Empty if private recipe (recipe only)
+WEBSITE  = 'Website'                      # Website, String.  Empty if private recipe (recipe only)
 FILMSIMULATION   = 'Filmsimulation'       # String Fujifilm's Simulation Name. See FS....
 BW_FILTER    = 'BW Filter'                # String Fujifilm's Simulation Name. See bwfilter
 BW_COLOR_WC   = 'BW Color WC'             # Signed Integer: -18 .. 18

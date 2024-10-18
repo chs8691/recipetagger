@@ -11,6 +11,7 @@ args = None
 rfields = [
     R.NAME,
     R.PUBLISHER,
+    R.WEBSITE,
     R.FILMSIMULATION,
     R.BW_FILTER,
     R.BW_COLOR_WC,
@@ -38,6 +39,7 @@ rfields = [
 cfields = [
     CSV.NAME,
     CSV.PUBLISHER,
+    CSV.WEBSITE,
     CSV.FILMSIMULATION,
     CSV.BW_COLOR_WC,
     CSV.BW_COLOR_MC,

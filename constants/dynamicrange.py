@@ -1,4 +1,5 @@
 # DR
+OFF = 'OFF'
 AUTO = 'AUTO'
 DR100 = '100'
 DR200 = '200'

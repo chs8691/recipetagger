@@ -8,6 +8,8 @@ import constants.filmsimulations as FS
 import constants.grain as GR
 import constants.colorchrome as CC
 import constants.sensor as SR
+import constants.drangepriority as DRP
+import constants.dynamicrange as DR
 from os import path
 from os import listdir
 import subprocess
@@ -18,6 +20,9 @@ from exiftool import ExifToolHelper, ExifTool
 args=None
 
 recipes = [] 
+
+# Description header is used to identify existing recipe info entries.
+HEADER = '\n\n--- Recipe info ---'
 
 def log(message):
     """Logs to console in verbose mode"""
@@ -222,9 +227,11 @@ def check_recipe(exif, recipe):
     """ Compare image exifs data wth recipe's data to find differences and calculate a
         total score percentage value.
         Returns tuple with three values:
-        - score percetange value (0..100)
-        - Name of the recipe
-        - list with four value tuple:
+        - 0: score percetange value (0..100)
+        - 1: Name of the recipe
+        - 2: Pubisher of the recipe
+        - 3: Website of the recipe
+        - 4: list with four value tuple:
           - score (0..99)
           - Field name
           - exif value
@@ -250,6 +257,67 @@ def check_recipe(exif, recipe):
     if act < MAX:
         failed.append((act, field, exif[field], recipe[field]))
 
+
+    field = R.DRANGE_PRIORITY
+    weight = 3
+
+    if field in exif:
+        evalue = exif[field]
+    else:
+        evalue = DRP.OFF
+
+    if field in recipe:
+        rvalue = recipe[field]
+    else:
+        rvalue = DRP.OFF
+
+    act = rate_range(0, 2, drp_as_int(evalue), drp_as_int(rvalue))
+    total += act * weight
+    max_total += MAX * weight
+    if act < MAX:
+        failed.append((act, field, evalue, rvalue))
+
+
+    field = R.DYNAMIC_RANGE
+    weight = 3
+
+    if field in exif:
+        evalue = exif[field]
+    else:
+        evalue = DR.OFF
+
+    if field in recipe:
+        rvalue = recipe[field]
+    else:
+        rvalue = DR.OFF
+
+    act = rate_range(0, 2, dr_as_int(evalue), dr_as_int(rvalue))
+    total += act * weight
+    max_total += MAX * weight
+    if act < MAX:
+        failed.append((act, field, evalue, rvalue))
+
+    # Just check Shadows and Highlight if recipe is in DR Mode      
+    if evalue != DR.OFF and rvalue != DR.OFF:
+
+        field = R.SHADOWS
+        weight = 2
+        act = rate_range(-2, 4, exif[field], recipe[field])
+        total += act * weight
+        max_total += MAX * weight
+        if act < MAX:
+            failed.append((act, field, exif[field], recipe[field]))
+
+
+        field = R.HIGHLIGHTS
+        weight = 2
+        act = rate_range(-2, 4, exif[field], recipe[field])
+        total += act * weight
+        max_total += MAX * weight
+        if act < MAX:
+            failed.append((act, field, exif[field], recipe[field]))
+
+
     field = R.GRAIN_EFFECT
     weight = 3
     act =  rate_range(0, 4, grain_as_int(exif[field]), grain_as_int(recipe[field]))
@@ -269,6 +337,39 @@ def check_recipe(exif, recipe):
     field = R.CCRFX_BLUE
     weight = 2
     act =  rate_range(0, 2, cc_as_int(exif[field]), cc_as_int(recipe[field]))
+    total += act * weight
+    max_total += MAX * weight
+    if act < MAX:
+        failed.append((act, field, exif[field], recipe[field]))
+
+    field = R.WHITE_BALANCE
+    weight = 5
+    act = rate_wb(exif[field], recipe[field])
+    total += act * weight
+    max_total += MAX * weight
+    if act < MAX:
+        failed.append((act, field, exif[field], recipe[field]))
+
+    if exif[field] == WB.KELVIN and recipe[field] == WB.KELVIN:
+        field = R.KELVIN
+        weight = 5
+        act = rate_range(2500, 10000, exif[field], recipe[field])
+        total += act * weight
+        max_total += MAX * weight
+        if act < MAX:
+            failed.append((act, field, exif[field], recipe[field]))
+
+    field = R.WHITE_BALANCE_R
+    weight = 3
+    act = rate_range(-9, +9, exif[field], recipe[field])
+    total += act * weight
+    max_total += MAX * weight
+    if act < MAX:
+        failed.append((act, field, exif[field], recipe[field]))
+
+    field = R.WHITE_BALANCE_B
+    weight = 3
+    act = rate_range(-9, +9, exif[field], recipe[field])
     total += act * weight
     max_total += MAX * weight
     if act < MAX:
@@ -359,9 +460,25 @@ def check_recipe(exif, recipe):
             failed.append((act, field, exifval, recipeval))
 
 
+    field = R.ISO_MIN
+    weight = 1
+    act =  rate_iso_min(exif[R.ISO], recipe[field])
+    total += act * weight
+    max_total += MAX * weight
+    if act < MAX:
+        failed.append((act, field, exif[R.ISO], recipe[field]))
+
+    field = R.ISO_MAX
+    weight = 1
+    act =  rate_iso_max(exif[R.ISO], recipe[R.ISO_MAX])
+    total += act * weight
+    max_total += MAX * weight
+    if act < MAX:
+        failed.append((act, field, exif[R.ISO], recipe[field]))
+
     field = R.XTRANS_VERSION
     weight = 2
-    # Increase max value for new sensor generations
+    # Increase max value to suppoert new sensor generations in future
     act =  rate_range(1, 5, sensor_as_int(exif[field]), sensor_as_int(recipe[field]))
     total += act * weight
     max_total += MAX * weight
@@ -371,8 +488,36 @@ def check_recipe(exif, recipe):
 
     failed.sort(key=lambda a: a[0])
 
-    return (int(100 / max_total * total), recipe[R.NAME], failed)
+    return (int(100 / max_total * total), recipe[R.NAME], recipe[R.PUBLISHER], recipe[R.WEBSITE], failed)
 
+
+
+def drp_as_int(value):
+    """Interprates dynamic range priority value as integer for better compareness.
+    Return interger 0 (OFF) ... 2 (STRONG), otherwise None (AUTO)"""
+        
+    if value == DRP.OFF:
+        return 0
+    
+    elif value == DRP.WEAK:
+        return 1
+    
+    elif value == DRP.STRONG:
+        return 2
+
+    return None
+
+def dr_as_int(value):
+    """Interprates dynamic range value as integer for better compareness.
+    Return interger 0 (WEAK) ... 2 (STRONG), otherwise None (AUTO)"""
+        
+    if value == DR.DR100:
+        return 1
+    
+    elif value == DRP.STRONG:
+        return 2
+
+    return 0
 
 
 def grain_as_int(value):
@@ -444,6 +589,34 @@ def rate_range(min, max, evalue, rvalue):
     return int(100 / max * (max - diff))
 
 
+def rate_iso_max(evalue, rvalue):
+    """Returns integer 0 (over) .. 100 (below)"""
+
+    if evalue <= rvalue:
+        return 100
+
+    return 0
+
+def rate_iso_min(evalue, rvalue):
+    """Returns integer 0 (below) .. 100 (above)"""
+
+    if evalue >= rvalue:
+        return 100
+
+    return 0
+
+def rate_wb(evalue,rvalue):
+    """Returns integer 0 (no match) .. 100 (total match)"""
+
+    if evalue == rvalue:
+        return 100
+    
+    wb = [WB.AUTO, WB.AMBIENCE_PRIORITY, WB.WHITE_PRIORITY]
+    if evalue in wb and rvalue in wb:
+        return 80
+
+    return 0
+
 def rate_fs(evalue, rvalue):
     """Returns integer 0 (no match) .. 100 (total match) """
     
@@ -469,61 +642,154 @@ def rate_fs(evalue, rvalue):
     return 0
 
 
-def update_description(filename, res):
+def write_description(filename, res, exif):
     """Update description in the image file
     res: Ascending list of rated recipes.
-    To show it i digikam the text will be saved in multiple fields, but without language association.
+    exif: If no valid match found, EXIF data will be printed instead
+    To show it in digikam the text will be saved in multiple fields, but without language association.
     """
     
     print(f'\n{path.basename(filename)}')
 
+    lines = []
+    old = ''
+
+    field = 'EXIF:ImageDescription'
+    with ExifToolHelper() as et:
+        values = et.get_tags(filename, field)
+        if len(values) > 0:
+            old = values[0][field]
+            log(f'Read existing description:\n{old}')
+            if HEADER in old:
+                old = old.split(HEADER)[0]
+                log(f'Reduced to:\n{old}')
+
+    lines.append(HEADER)
+
     if len(res) == 0:
         print('  No match found :o(')
-        return
 
-    item = res[0]
+    else:
 
-    if item[0] == 100:
-        print(f'   Complete fitting recipe: {item[1]}')
-        return
-    
-    # TODO Wie bekommt man nun eine Mehrzeilige Beschriftung hin? Und wieso sieht man es nicht in Digikam. Language?
-
-    lines = []
-    lines.append('--- Best fitting recipe ({:2d}%) and the image its deviation settings:'.format(item[0]))
-    lines.append('{}.'.format(item[1]))
-    for v in item[2]:
-        lines.append('    {:s}: {:s} {:s}'.format(str(v[1]), str(v[2]), f'({str(v[3])})'))
+        # Best matching recipe
+        item = res[0]
 
 
-    # with tempfile.TemporaryFile() as fp:
-    #     fp.write(d.encode('ascii'))
-    #     descr=fp.read
-    descr = ' '.join(lines)
-    # descr = '''a
-    # b'''
+        # Print as recipe match
+        if item[0] >= 75:
 
-    descr = '''nr3
-    nr4'''
+            # Recipe name and publisher
+            lines.append('{} by {}'.format(item[1], item[2]))
+
+            # Recipe website
+            lines.append('{}'.format(item[3]))
+
+            lines.append('Divergent settings:')
+            # Deviating settings
+            for v in item[4]:
+                lines.append('- {:s}: {:s} {:s}'.format(str(v[1]), str(v[2]), f'({str(v[3])})'))
+
+            lines.append('\n')
+
+        # No good match just print exif settings
+        else:
+            exifdata = gather(exif)
+            for (k, v) in exifdata:
+                lines.append('{}: {}'.format(k, str(v)))
+          
+
+    descr = old + '\n'.join(lines)
+ 
     print('description=' + descr)
 
-    ret = subprocess.run(["exiftool", f"-imagedescription={descr}", f"{filename}"])
-    print(f"returncode={ret.returncode}")
+    # Use exiftool directly. Neither ExiftoolHelper nor ExifTool is able to handle newlines.
+    ret = subprocess.run(["exiftool", f"-imagedescription={descr}", 
+                          f"-XMP:ImageDescription={descr}", f"-XMP:Description={descr}",  f"{filename}"])
 
-    # with ExifTool() as ex:
-    #     # ex.execute("-escapeC", f"-imagedescription={descr}", ÷  f"{filename}")
-    #     ex.execute( f"-imagedescription={descr}",   f"{filename}")
+    if ret.returncode is not 0:
+        print(f"ERROR Update image description failed. Returncode={ret.returncode}")
 
-    # with ExifToolHelper() as et:
-    #     et.set_tags(files=[filename], tags={"imagedescription": descr}, params="-escapeC")
-    # with ExifToolHelper() as et:
-    #     et.set_tags(files=[filename], tags={"exif:ImageDescription": descr})
-    # with ExifToolHelper() as et:
-    #     et.set_tags(files=[filename], tags={"XMP:ImageDescription": descr})
-    # with ExifToolHelper() as et:
-    #     et.set_tags(files=[filename], tags={"XMP:Description": descr})
 
-def report(filename, res):
+def gather(exif):
+    """Return sorted list from relevant exif data as key value tuple"""
+    ret = []
+
+    field = R.FILMSIMULATION
+    ret.append((field, exif[field]))
+
+    bw = [FS.ACROS, FS.MONOCHROME]
+    if exif[field] in bw:
+        field = R.BW_COLOR_MC
+        field2 = R.BW_COLOR_WC
+        if(exif[field] != 0 or exif[field2] !=0 ):
+            ret.append((field, exif[field]))
+            ret.append((field2, exif[field2]))
+
+    field = R.BW_FILTER
+    if field in exif:
+        ret.append((field, exif[field]))
+
+    field = R.GRAIN_EFFECT
+    if(exif[field] != GR.OFF):
+        ret.append((field, exif[field]))
+    
+    field = R.CCR_EFFECT
+    if(exif[field] != CC.OFF):
+        ret.append((field, exif[field]))
+
+    field = R.CCRFX_BLUE
+    if(exif[field] != CC.OFF):
+        ret.append((field, exif[field]))
+
+    field = R.WHITE_BALANCE
+    ret.append((field, exif[field]))
+
+    field = R.KELVIN
+    if(exif[R.WHITE_BALANCE] == WB.KELVIN):
+        ret.append((field, exif[field]))
+
+    field = R.WHITE_BALANCE_R
+    field2 = R.WHITE_BALANCE_B
+    # Has either no field or both fields
+    if(field in exif):
+        ret.append((field, exif[field]))
+        ret.append((field2, exif[field2]))
+
+    field = R.DYNAMIC_RANGE
+    if(exif[field] != DR.OFF):
+        ret.append((field, exif[field]))
+
+        field = R.SHADOWS
+        if(exif[field] != 0):
+            ret.append((field, exif[field]))
+
+        field = R.HIGHLIGHTS
+        if(exif[field] != 0):
+            ret.append((field, exif[field]))
+
+    field = R.DRANGE_PRIORITY
+    if(field in exif):
+        ret.append((field, exif[field]))
+
+    field = R.SHARPNESS
+    if(exif[field] != 0):
+        ret.append((field, exif[field]))
+
+    field = R.HIGH_ISONR
+    if(exif[field] != 0):
+        ret.append((field, exif[field]))
+
+    field = R.CLARITY
+    if(exif[field] != 0):
+        ret.append((field, exif[field]))
+
+    field = R.ISO
+    ret.append((field, exif[field]))
+
+    return ret
+
+
+def write_report(filename, res):
     """Print result to the console.
     res: Ascending list of rated recipes.
     """
@@ -541,9 +807,11 @@ def report(filename, res):
         return
 
     print('   Best fitting recipe ({:2d}%) and the image\'s deviation settings:'.format(item[0]))
-    print('   {}'.format(item[1]))
-    for v in item[2]:
-        print('    {:18s}: {:18s} {:18s} {:2d}%'.format(str(v[1]), str(v[2]), f'({str(v[3])})', v[0]))
+    print('     {} by {}'.format(item[1], item[2]))
+    print('       {}'.format(item[3]))
+
+    for v in item[4]:
+        print('       {:18s}: {:18s} {:18s} {:2d}%'.format(str(v[1]), str(v[2]), f'({str(v[3])})', v[0]))
 
 
 def get_image_files(pathto):
@@ -589,10 +857,10 @@ def process():
             continue
 
         if args.print:
-            report(f, res)
+            write_report(f, res)
 
         if args.description:
-            update_description(f, res)
+            write_description(f, res, exif)
 
     if err == 0:
         print(f'\nProcessed all {total} image(s) successfully.')

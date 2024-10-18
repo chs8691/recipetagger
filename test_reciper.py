@@ -17,6 +17,7 @@ def test_extract_recipe_data():
     row = {CSV.NAME             :"Recipe Nr. 1",
            CSV.PUBLISHER        :"Max Morytz",
            CSV.FILMSIMULATION   :"Astia",
+           CSV.WEBSITE          :"xy.com",
            CSV.BW_COLOR_MC      :"",
            CSV.BW_COLOR_WC      :"",
            CSV.GRAIN_EFFECT     :"weak/small",
@@ -44,6 +45,7 @@ def test_extract_recipe_data():
 
     assert r[R.NAME] == 'Recipe Nr. 1'
     assert r[R.PUBLISHER] == 'Max Morytz'
+    assert r[R.WEBSITE] == 'xy.com'
     assert r[R.XTRANS_VERSION] == 'V'
     assert r[R.FILMSIMULATION] == FS.ASTIA
     assert R.BW_COLOR_WC not in r 
@@ -68,6 +70,7 @@ def test_extract_recipe_data2():
 
     row = {CSV.NAME              :"Recipe Nr. 2",
            CSV.PUBLISHER         :"Max Morytz",
+           CSV.WEBSITE          :"xy.com",
            CSV.FILMSIMULATION    :"ACROS",
            CSV.BW_COLOR_MC       :"+1",
            CSV.BW_COLOR_WC       :"-1",
@@ -95,6 +98,7 @@ def test_extract_recipe_data2():
 
     assert r[R.NAME] == 'Recipe Nr. 2'
     assert r[R.PUBLISHER] == 'Max Morytz'
+    assert r[R.WEBSITE] == 'xy.com'
     assert r[R.XTRANS_VERSION] == 'IV'
     assert r[R.FILMSIMULATION] == FS.ACROS
     assert r[R.BW_COLOR_WC] == -1

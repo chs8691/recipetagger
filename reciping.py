@@ -31,7 +31,12 @@ def extract_data(row):
     field = CSV.PUBLISHER
     value = row[field].strip()
     recipe[R.PUBLISHER] = value
+
     
+    field = CSV.WEBSITE
+    value = row[field].strip()
+    recipe[R.WEBSITE] = value
+
 
     field = CSV.FILMSIMULATION
     value=row[field]

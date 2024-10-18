@@ -2,6 +2,7 @@
 
 NAME                = 'Name'
 PUBLISHER           = 'Publisher'
+WEBSITE             = 'Website'
 FILMSIMULATION      = 'Film Simulation'
 BW_COLOR_MC         = 'BW Color MC'
 BW_COLOR_WC         = 'BW Color WC'
