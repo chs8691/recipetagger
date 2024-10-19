@@ -21,6 +21,8 @@ args=None
 
 recipes = [] 
 
+THRESHOLD = 85
+
 # Description header is used to identify existing recipe info entries.
 HEADER = '\n\n--- Recipe info ---'
 
@@ -54,6 +56,8 @@ def parse_args():
                         help='Print result to console')
     parser.add_argument('-d', '--description', action='store_true',
                         help='Insert result into image description')
+    parser.add_argument('-k', '--keywords', action='store_true',
+                        help='Update image keywords with recipe and filmsimulation')
     parser.add_argument('path', metavar='PATH', type=str, nargs=1,
                     help='Path to image file(s). Only JPG files will be processed. Can be a directory or a single file name. Wildcards are not supported.')
     
@@ -259,7 +263,7 @@ def check_recipe(exif, recipe):
 
 
     field = R.DRANGE_PRIORITY
-    weight = 3
+    weight = 5
 
     if field in exif:
         evalue = exif[field]
@@ -642,74 +646,6 @@ def rate_fs(evalue, rvalue):
     return 0
 
 
-def write_description(filename, res, exif):
-    """Update description in the image file
-    res: Ascending list of rated recipes.
-    exif: If no valid match found, EXIF data will be printed instead
-    To show it in digikam the text will be saved in multiple fields, but without language association.
-    """
-    
-    print(f'\n{path.basename(filename)}')
-
-    lines = []
-    old = ''
-
-    field = 'EXIF:ImageDescription'
-    with ExifToolHelper() as et:
-        values = et.get_tags(filename, field)
-        if len(values) > 0:
-            old = values[0][field]
-            log(f'Read existing description:\n{old}')
-            if HEADER in old:
-                old = old.split(HEADER)[0]
-                log(f'Reduced to:\n{old}')
-
-    lines.append(HEADER)
-
-    if len(res) == 0:
-        print('  No match found :o(')
-
-    else:
-
-        # Best matching recipe
-        item = res[0]
-
-
-        # Print as recipe match
-        if item[0] >= 75:
-
-            # Recipe name and publisher
-            lines.append('{} by {}'.format(item[1], item[2]))
-
-            # Recipe website
-            lines.append('{}'.format(item[3]))
-
-            lines.append('Divergent settings:')
-            # Deviating settings
-            for v in item[4]:
-                lines.append('- {:s}: {:s} {:s}'.format(str(v[1]), str(v[2]), f'({str(v[3])})'))
-
-            lines.append('\n')
-
-        # No good match just print exif settings
-        else:
-            exifdata = gather(exif)
-            for (k, v) in exifdata:
-                lines.append('{}: {}'.format(k, str(v)))
-          
-
-    descr = old + '\n'.join(lines)
- 
-    print('description=' + descr)
-
-    # Use exiftool directly. Neither ExiftoolHelper nor ExifTool is able to handle newlines.
-    ret = subprocess.run(["exiftool", f"-imagedescription={descr}", 
-                          f"-XMP:ImageDescription={descr}", f"-XMP:Description={descr}",  f"{filename}"])
-
-    if ret.returncode is not 0:
-        print(f"ERROR Update image description failed. Returncode={ret.returncode}")
-
-
 def gather(exif):
     """Return sorted list from relevant exif data as key value tuple"""
     ret = []
@@ -789,6 +725,147 @@ def gather(exif):
     return ret
 
 
+def write_description(filename, res, exif):
+    """Update description in the image file
+    res: Ascending list of rated recipes.
+    exif: If no valid match found, EXIF data will be printed instead
+    To show it in digikam the text will be saved in multiple fields, but without language association.
+    """
+    
+    print(f'\n{path.basename(filename)}')
+
+    lines = []
+    old = ''
+
+    field = 'EXIF:ImageDescription'
+    with ExifToolHelper() as et:
+        values = et.get_tags(filename, field)
+        if len(values) > 0:
+            old = values[0][field]
+            log(f'Read existing description:\n{old}')
+            if HEADER in old:
+                old = old.split(HEADER)[0]
+                log(f'Reduced to:\n{old}')
+
+    lines.append(HEADER)
+
+    if len(res) == 0:
+        print('  No match found :o(')
+
+    else:
+
+        # Best matching recipe
+        item = res[0]
+
+
+        # Print as recipe match
+        if item[0] >= THRESHOLD:
+
+            # Recipe name and publisher
+            lines.append('{} by {}'.format(item[1], item[2]))
+
+            # Recipe website
+            lines.append('{}'.format(item[3]))
+
+            lines.append('Divergent settings:')
+            # Deviating settings
+            for v in item[4]:
+                lines.append('- {:s}: {:s} {:s}'.format(str(v[1]), str(v[2]), f'({str(v[3])})'))
+
+            lines.append('\n')
+
+        # No good match just print exif settings
+        else:
+            exifdata = gather(exif)
+            for (k, v) in exifdata:
+                lines.append('{}: {}'.format(k, str(v)))
+          
+
+    descr = old + '\n'.join(lines)
+ 
+    print('description=' + descr)
+
+    # Use exiftool directly. Neither ExiftoolHelper nor ExifTool is able to handle newlines.
+    ret = subprocess.run(["exiftool", f"-imagedescription={descr}", 
+                          f"-XMP:ImageDescription={descr}", f"-XMP:Description={descr}",  f"{filename}"])
+
+    if ret.returncode != 0:
+        print(f"ERROR Update image description failed. Returncode={ret.returncode}")
+
+
+def modify_keywords(filename, res, exif):
+    """Update keywords in the image file with film simulsation and, if available, recipe name.
+       Existing values will be deleted!
+    """
+
+    fs_root = 'Fuji-X'
+    fs_bw = 'BW'
+    fs_color = 'Color'
+    recipe_root = 'Recipe'
+
+    tags = []
+
+    field = R.FILMSIMULATION
+    if exif[field] in [FS.ACROS, FS.MONOCHROME, FS.SEPIA]:
+        subdir = fs_bw
+    else:
+        subdir = fs_color
+
+    tags.append(f'{fs_root}/{subdir}/{exif[R.FILMSIMULATION]}')
+
+    if len(res) > 0 and res[0][0] >= THRESHOLD:
+        field = R.NAME
+        tags.append(f'{recipe_root}/{res[0][2]}/{res[0][1]}')
+
+
+    old_tags = []
+    tagname = 'XMP:TagsList'
+    with ExifToolHelper() as et:
+        old_tags = et.get_tags(filename, tags=[tagname])[0][tagname]
+
+    log(f'Old tags:{old_tags}')
+
+    # Untouch foreign values
+    for t in old_tags:
+        if not (t.startswith(fs_root) or t.startswith(recipe_root)):
+            tags.append(t)
+
+    # For the specific tags differnt formats
+    ptags = []
+    wtags = []
+    for t in tags:
+        ptags.append(t.replace('/', '|'))
+        wtags.append(t.split('/')[-1])
+
+    log(f'Old tags:{old_tags}')
+    log(f'New tags:{tags}')
+    log(f'New tags piped:{ptags}')
+    log(f'New tags words:{wtags}')
+
+
+    with ExifToolHelper() as et:
+        tagname = 'XMP:TagsList'
+        et.set_tags(filename, tags={tagname: tags})
+
+        tagname = 'XMP:LastKeywordXMP'
+        et.set_tags(filename, tags={tagname: tags})
+
+        tagname = 'XMP:LastKeywordXMP'
+        et.set_tags(filename, tags={tagname: tags})
+
+        tagname = 'XMP:HierarchicalSubject'
+        et.set_tags(filename, tags={tagname: ptags})
+
+        tagname = 'XMP:CatalogSets'
+        et.set_tags(filename, tags={tagname: ptags})
+
+        tagname = 'IPTC:Keywords'
+        et.set_tags(filename, tags={tagname: wtags})
+
+        tagname = 'XMP:Subject'
+        et.set_tags(filename, tags={tagname: wtags})
+
+
 def write_report(filename, res):
     """Print result to the console.
     res: Ascending list of rated recipes.
@@ -806,6 +883,9 @@ def write_report(filename, res):
         print(f'   Complete fitting recipe: {item[1]}')
         return
 
+    if item[0] < THRESHOLD:
+        print('   No matching recipe found for THRESHOLD={}!'.format(THRESHOLD))
+    
     print('   Best fitting recipe ({:2d}%) and the image\'s deviation settings:'.format(item[0]))
     print('     {} by {}'.format(item[1], item[2]))
     print('       {}'.format(item[3]))
@@ -834,6 +914,7 @@ def get_image_files(pathto):
     else:
         exit(f'Neither an image file nor a path: {pathto}')
 
+
 def process():
     
     global recipes
@@ -861,6 +942,9 @@ def process():
 
         if args.description:
             write_description(f, res, exif)
+
+        if args.keywords:
+            modify_keywords(f, res, exif)
 
     if err == 0:
         print(f'\nProcessed all {total} image(s) successfully.')
