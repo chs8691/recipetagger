@@ -34,6 +34,7 @@ def test_exif_map_wb_finetune():
     assert ex.map_wb_finetune("19 -18") == (19, -18)
     assert ex.map_wb_finetune("20 -40") == (1, -2)
 
+
 def test_exif_sharpness():
     assert ex.map_sharpness(0) == -4
     assert ex.map_sharpness(1) == -3
@@ -45,12 +46,24 @@ def test_exif_sharpness():
     assert ex.map_sharpness(130) == -1 
     assert ex.map_sharpness(132) == 1
 
+
 def test_exif_map_clarity():
     assert ex.map_clarity(0) == 0
     assert ex.map_clarity(-1000) == -1
     assert ex.map_clarity(-5000) == -5
     assert ex.map_clarity(1000) == 1
     assert ex.map_clarity(5000) == 5
+
+
+def test_exif_map_tone():
+    assert ex.map_tone(0) == 0
+    assert ex.map_tone(-64) == 4
+    assert ex.map_tone(-48) == 3
+    assert ex.map_tone(-32) == 2
+    assert ex.map_tone(-16) == 1
+    assert ex.map_tone(16) == -1
+    assert ex.map_tone(32) == -2
+
 
 def test_exif_map_noisereduction():
     assert ex.map_noisereduction(0) == 0

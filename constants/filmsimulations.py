@@ -13,3 +13,7 @@ ETERNA_BLEACH_BYPASS  = 'ETERNA_BLEACH_BYPASS'
 ACROS  = 'ACROS'
 MONOCHROME  = 'MONOCHROME'
 SEPIA  = 'SEPIA'
+
+def name(fs):
+    """Returns human readable name for the given film simulation"""
+    return fs.replace('_', ' ').capitalize

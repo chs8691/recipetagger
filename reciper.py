@@ -10,8 +10,7 @@ import constants.colorchrome as CC
 import constants.sensor as SR
 import constants.drangepriority as DRP
 import constants.dynamicrange as DR
-from os import path
-from os import listdir
+from os import path, remove, listdir
 import subprocess
 
 # exiftool must be installed on the system
@@ -22,6 +21,13 @@ args=None
 recipes = [] 
 
 THRESHOLD = 85
+
+#  Path for hierarchical keywords
+FS_ROOT = 'Fuji-X'
+FS_SUB_BW = 'BW'
+FS_SUB_COLOR = 'Color'
+RECIPE_ROOT = 'Recipe'
+
 
 # Description header is used to identify existing recipe info entries.
 HEADER = '\n\n--- Recipe info ---'
@@ -188,9 +194,9 @@ def read_file(filename):
                     return None
                 
                 field='MakerNotes:HighlightTone'
-                exif[R.HIGHLIGHTS] = d[field]
+                exif[R.HIGHLIGHTS] = ex.map_tone(d[field])
                 field='MakerNotes:ShadowTone'
-                exif[R.SHADOWS] = d[field]
+                exif[R.SHADOWS] = ex.map_tone(d[field])
               
             field='MakerNotes:NoiseReduction'            
             exif[R.HIGH_ISONR]=ex.map_noisereduction(d[field])
@@ -492,7 +498,7 @@ def check_recipe(exif, recipe):
 
     failed.sort(key=lambda a: a[0])
 
-    return (int(100 / max_total * total), recipe[R.NAME], recipe[R.PUBLISHER], recipe[R.WEBSITE], failed)
+    return (int(total * 100 / max_total), recipe[R.NAME], recipe[R.PUBLISHER], recipe[R.WEBSITE], failed)
 
 
 
@@ -740,7 +746,7 @@ def write_description(filename, res, exif):
     field = 'EXIF:ImageDescription'
     with ExifToolHelper() as et:
         values = et.get_tags(filename, field)
-        if len(values) > 0:
+        if len(values) > 0 and field in values[0]:
             old = values[0][field]
             log(f'Read existing description:\n{old}')
             if HEADER in old:
@@ -786,8 +792,9 @@ def write_description(filename, res, exif):
     print('description=' + descr)
 
     # Use exiftool directly. Neither ExiftoolHelper nor ExifTool is able to handle newlines.
-    ret = subprocess.run(["exiftool", f"-imagedescription={descr}", 
-                          f"-XMP:ImageDescription={descr}", f"-XMP:Description={descr}",  f"{filename}"])
+    ret = subprocess.run(["exiftool", "-overwrite_original", "-P", f"-imagedescription={descr}", 
+                          f"-XMP:ImageDescription={descr}", f"-XMP:Description={descr}", 
+                          f"{filename}"])
 
     if ret.returncode != 0:
         print(f"ERROR Update image description failed. Returncode={ret.returncode}")
@@ -795,39 +802,45 @@ def write_description(filename, res, exif):
 
 def modify_keywords(filename, res, exif):
     """Update keywords in the image file with film simulsation and, if available, recipe name.
-       Existing values will be deleted!
+       Existing values will be deleted from the hierarchical paths.
+       Name of the film simulations is formatted as str.title()
     """
-
-    fs_root = 'Fuji-X'
-    fs_bw = 'BW'
-    fs_color = 'Color'
-    recipe_root = 'Recipe'
 
     tags = []
 
     field = R.FILMSIMULATION
     if exif[field] in [FS.ACROS, FS.MONOCHROME, FS.SEPIA]:
-        subdir = fs_bw
+        subdir = FS_SUB_BW
     else:
-        subdir = fs_color
-
-    tags.append(f'{fs_root}/{subdir}/{exif[R.FILMSIMULATION]}')
+        subdir = FS_SUB_COLOR
+          
+    tags.append(f'{FS_ROOT}/{subdir}/{exif[R.FILMSIMULATION].replace('_', ' ').title()}')
 
     if len(res) > 0 and res[0][0] >= THRESHOLD:
         field = R.NAME
-        tags.append(f'{recipe_root}/{res[0][2]}/{res[0][1]}')
+        tags.append(f'{RECIPE_ROOT}/{res[0][2]}/{res[0][1]}')
 
 
     old_tags = []
     tagname = 'XMP:TagsList'
     with ExifToolHelper() as et:
-        old_tags = et.get_tags(filename, tags=[tagname])[0][tagname]
+        data = et.get_tags(filename, tags=[tagname])
+        if len(data) > 0 and tagname in data[0]:
+
+            # Single value: str
+            if type(data[0][tagname]) == str:
+                old_tags = [data[0][tagname]]
+
+            # Multiple values: List with str
+            else:
+                old_tags = data[0][tagname]
+
 
     log(f'Old tags:{old_tags}')
 
-    # Untouch foreign values
+    # Untouched foreign values
     for t in old_tags:
-        if not (t.startswith(fs_root) or t.startswith(recipe_root)):
+        if not (t.startswith(FS_ROOT) or t.startswith(RECIPE_ROOT)):
             tags.append(t)
 
     # For the specific tags differnt formats
@@ -845,25 +858,25 @@ def modify_keywords(filename, res, exif):
 
     with ExifToolHelper() as et:
         tagname = 'XMP:TagsList'
-        et.set_tags(filename, tags={tagname: tags})
+        et.set_tags(filename, tags={tagname: tags}, params=["-P", "-overwrite_original"])
 
         tagname = 'XMP:LastKeywordXMP'
-        et.set_tags(filename, tags={tagname: tags})
+        et.set_tags(filename, tags={tagname: tags}, params=["-P", "-overwrite_original"])
 
         tagname = 'XMP:LastKeywordXMP'
-        et.set_tags(filename, tags={tagname: tags})
+        et.set_tags(filename, tags={tagname: tags}, params=["-P", "-overwrite_original"])
 
         tagname = 'XMP:HierarchicalSubject'
-        et.set_tags(filename, tags={tagname: ptags})
+        et.set_tags(filename, tags={tagname: ptags}, params=["-P", "-overwrite_original"])
 
         tagname = 'XMP:CatalogSets'
-        et.set_tags(filename, tags={tagname: ptags})
+        et.set_tags(filename, tags={tagname: ptags}, params=["-P", "-overwrite_original"])
 
         tagname = 'IPTC:Keywords'
-        et.set_tags(filename, tags={tagname: wtags})
+        et.set_tags(filename, tags={tagname: wtags}, params=["-P", "-overwrite_original"])
 
         tagname = 'XMP:Subject'
-        et.set_tags(filename, tags={tagname: wtags})
+        et.set_tags(filename, tags={tagname: wtags}, params=["-P", "-overwrite_original"])
 
 
 def write_report(filename, res):

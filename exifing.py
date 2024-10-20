@@ -61,6 +61,35 @@ def map_wb_finetune(values):
         return (int(r) / 20, int(b) / 20)
     
 
+def map_tone(value):
+    """Returns values as signed integer. 
+    In exif, the value is a signed integer, too.
+
+    -64 = +4 (hardest)
+    -48 = +3 (very hard)
+    -32 = +2 (hard)
+    -16 = +1 (medium hard)	  	
+    0   =  0 (normal)
+    16  = -1 (medium soft)
+    32  = -2 (soft)
+    """
+
+    match value:
+        case -64:
+            return 4
+        case -48:
+            return 3
+        case -32:
+            return 2
+        case -16:
+            return 1
+        case 16:
+            return -1
+        case 32:
+            return -2
+    
+    return 0
+
 def map_clarity(value):
     """Returns values as signed integer. 
     In exif, the value is a signed integer, too.
