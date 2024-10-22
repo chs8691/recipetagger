@@ -10,7 +10,8 @@ import constants.colorchrome as CC
 import constants.sensor as SR
 import constants.drangepriority as DRP
 import constants.dynamicrange as DR
-from os import path, remove, listdir
+from os import path, listdir
+from glob import glob
 import subprocess
 
 # exiftool must be installed on the system
@@ -64,8 +65,8 @@ def parse_args():
                         help='Insert result into image description')
     parser.add_argument('-k', '--keywords', action='store_true',
                         help='Update image keywords with recipe and filmsimulation')
-    parser.add_argument('path', metavar='PATH', type=str, nargs=1,
-                    help='Path to image file(s). Only JPG files will be processed. Can be a directory or a single file name. Wildcards are not supported.')
+    parser.add_argument('file', metavar='FILE', type=str, nargs='+',
+                    help='Image file(s), support glob syntax. Use Wildcards to select mltiples files or pass mulptiple file names.')
     
     args = parser.parse_args()
 
@@ -908,25 +909,28 @@ def write_report(filename, res):
 
 
 def get_image_files(pathto):
-    """ Returns list with all JPG file names for the given path (without subdirectories).
+    """ Returns list with all selected file names for the given path (without subdirectories).
+    pathto: Either single file name or list with filenames
     """
 
-    if path.isdir(pathto):
-        log(f'Directory found: {pathto}')
-        files = [path.join(pathto, each) for each in listdir(pathto) if each.upper().endswith('.JPG')]
-        if len(files) > 0:
-            log(f'Found JPG files: {len(files)}')
-            return files
-        else:
-            exit(f'No JPG files found in: {pathto}')
-        
-    elif path.isfile(pathto) and pathto.upper().endswith('.JPG'):
-        log(f'Found single JPG file: {pathto}')
-        return [pathto]
-    
-    else:
-        exit(f'Neither an image file nor a path: {pathto}')
+    vvlog(f'get_image_files: {pathto}')
 
+    if pathto is str:
+        files = glob(pathto)
+    else:
+        files = pathto
+
+    if len(files) == 0:
+        exit(f'No files found at: {pathto}')
+    else:
+        print(f'Found {len(files)} file(s).')
+
+    for f in files:
+        if not (f.upper().endswith('JPG') or f.upper().endswith('JPG_ORIGINAL')):
+            print(f'WARN File with no jpg suffix: {f}')
+
+    log(f'Files: {files}')
+    return files
 
 def process():
     
@@ -937,7 +941,7 @@ def process():
 
     recipes = import_recipes(args.recipes)
 
-    files = get_image_files(args.path[0])
+    files = get_image_files(args.file)
 
     for f in files:
         total += 1
