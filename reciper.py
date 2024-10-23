@@ -21,7 +21,7 @@ args=None
 
 recipes = [] 
 
-THRESHOLD = 85
+THRESHOLD = [85]
 
 #  Path for hierarchical keywords
 FS_ROOT = 'Fuji-X'
@@ -60,7 +60,7 @@ def parse_args():
     parser.add_argument('-r', '--recipes', type=str, nargs=1, default='recipes.csv',
                         help='Update recipes from CSV file (Default: %(default)s) and store them in the internal Storage. See example file for columns names. ')
     parser.add_argument('-t', '--threshold', type=int, nargs=1, default=THRESHOLD,
-                        help='Threshold value for the match of percent of EXIF data and recipe (default: %(default)s) ')
+                        help=f'Threshold value for the match of percent of EXIF data and recipe (default: {THRESHOLD[0]}) ')
     parser.add_argument('-p', '--print', action='store_true',
                         help='Print result to console')
     parser.add_argument('-d', '--description', action='store_true',
@@ -230,8 +230,9 @@ def find_recipe(exif, recipes):
             return None
 
     results.sort(key=lambda a: a[0], reverse=True)
-    log('find_recipe()')
-    log(results)
+    
+    log(f'Imported {len(results)} recipes.')
+    vvlog(results)
 
     return results
 
@@ -741,7 +742,7 @@ def write_description(filename, res, exif, threshold):
     To show it in digikam the text will be saved in multiple fields, but without language association.
     """
     
-    print(f'\n{path.basename(filename)}')
+    log(f'\n{path.basename(filename)}')
 
     lines = []
     old = ''
@@ -792,7 +793,7 @@ def write_description(filename, res, exif, threshold):
 
     descr = old + '\n'.join(lines)
  
-    print('description=' + descr)
+    log('description=' + descr)
 
     # Use exiftool directly. Neither ExiftoolHelper nor ExifTool is able to handle newlines.
     ret = subprocess.run(["exiftool", "-overwrite_original", "-P", f"-imagedescription={descr}", 
@@ -973,8 +974,8 @@ def process():
 
 def main():
 
-    log('Verbose mode')
     parse_args()
+    log('Verbose mode')
     process()
 
 
