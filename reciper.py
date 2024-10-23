@@ -59,6 +59,8 @@ def parse_args():
     parser.add_argument('-vv', '--vverbose', help='Increase output very verbosity.', action="store_true")
     parser.add_argument('-r', '--recipes', type=str, nargs=1, default='recipes.csv',
                         help='Update recipes from CSV file (Default: %(default)s) and store them in the internal Storage. See example file for columns names. ')
+    parser.add_argument('-t', '--threshold', type=int, nargs=1, default=THRESHOLD,
+                        help='Threshold value for the match of percent of EXIF data and recipe (default: %(default)s) ')
     parser.add_argument('-p', '--print', action='store_true',
                         help='Print result to console')
     parser.add_argument('-d', '--description', action='store_true',
@@ -732,7 +734,7 @@ def gather(exif):
     return ret
 
 
-def write_description(filename, res, exif):
+def write_description(filename, res, exif, threshold):
     """Update description in the image file
     res: Ascending list of rated recipes.
     exif: If no valid match found, EXIF data will be printed instead
@@ -766,7 +768,7 @@ def write_description(filename, res, exif):
 
 
         # Print as recipe match
-        if item[0] >= THRESHOLD:
+        if item[0] >= threshold:
 
             # Recipe name and publisher
             lines.append('{} by {}'.format(item[1], item[2]))
@@ -801,7 +803,7 @@ def write_description(filename, res, exif):
         print(f"ERROR Update image description failed. Returncode={ret.returncode}")
 
 
-def modify_keywords(filename, res, exif):
+def modify_keywords(filename, res, exif, threshold):
     """Update keywords in the image file with film simulsation and, if available, recipe name.
        Existing values will be deleted from the hierarchical paths.
        Name of the film simulations is formatted as str.title()
@@ -817,7 +819,7 @@ def modify_keywords(filename, res, exif):
           
     tags.append(f'{FS_ROOT}/{subdir}/{exif[R.FILMSIMULATION].replace('_', ' ').title()}')
 
-    if len(res) > 0 and res[0][0] >= THRESHOLD:
+    if len(res) > 0 and res[0][0] >= threshold:
         field = R.NAME
         tags.append(f'{RECIPE_ROOT}/{res[0][2]}/{res[0][1]}')
 
@@ -880,7 +882,7 @@ def modify_keywords(filename, res, exif):
         et.set_tags(filename, tags={tagname: wtags}, params=["-P", "-overwrite_original"])
 
 
-def write_report(filename, res):
+def write_report(filename, res, threshold):
     """Print result to the console.
     res: Ascending list of rated recipes.
     """
@@ -897,8 +899,8 @@ def write_report(filename, res):
         print(f'   Complete fitting recipe: {item[1]}')
         return
 
-    if item[0] < THRESHOLD:
-        print('   No matching recipe found for THRESHOLD={}!'.format(THRESHOLD))
+    if item[0] < threshold:
+        print('   No matching recipe found for threshold={}!'.format(threshold))
     
     print('   Best fitting recipe ({:2d}%) and the image\'s deviation settings:'.format(item[0]))
     print('     {} by {}'.format(item[1], item[2]))
@@ -955,13 +957,13 @@ def process():
             continue
 
         if args.print:
-            write_report(f, res)
+            write_report(f, res, args.threshold[0])
 
         if args.description:
-            write_description(f, res, exif)
+            write_description(f, res, exif, args.threshold[0])
 
         if args.keywords:
-            modify_keywords(f, res, exif)
+            modify_keywords(f, res, exif, args.threshold[0])
 
     if err == 0:
         print(f'\nProcessed all {total} image(s) successfully.')
