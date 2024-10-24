@@ -7,7 +7,7 @@ Recipes can be imported by csv file. See example file `recipes.csv`. There are g
 > This software uses recipes published on the website 'Fuji X Weekly' by Ritchie Roesch and other sources. The name of the recipe and its settings have been carefully copied into this project. However, no responsibility is taken for the correctness, completeness and up-to-dateness.
 
 
-THe script compares the exif data of one or more images with every recipe of the imported recipes to find the best matching recipe. If a recipe is found, that matchs better than the given threshold, the result can be written into the image description. You can also tag the image the recipe as keyword. 
+The script compares the exif data of one or more images with every recipe of the imported recipes to find the best matching recipe. If a recipe is found, that matchs better than the given threshold, the result can be written into the image description. You can also tag the image the recipe as keyword. 
 
 In addition, the image can be tagged with the film simulation name.
 
@@ -137,6 +137,35 @@ Found 2 file(s).
 Processed all 2 image(s) successfully.
 ```
 
+No matching result updates the description, too:
+```console
+$ python reciper.py -t=100 -d import/20240918-154512-1188-X-T50.jpg 
+44/44 recipes imported.
+Found 1 file(s).
+    1 image files updated
+
+Processed all 1 image(s) successfully.
+```
+
+Result:
+```console
+$ exiftool -b  -imagedescription  import/20240918-154512-1188-X-T50.jpg
+Me an my dog.
+
+--- Recipe info ---
+Filmsimulation: NOSTALGIC_NEG
+Grain Effect: STRONG/SMALL
+CCR Effect: STRONG
+White Balance: AUTO
+White Balance R: -2.0
+White Balance B: -4.0
+Dynamic Range: 200
+Shadows: 3
+Sharpness: -2
+High ISO NR: -4
+Clarity: -3.0
+ISO: 640%    
+```
 
 ## Helpers
 
