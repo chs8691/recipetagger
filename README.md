@@ -89,7 +89,7 @@ Tags List : Fuji-X/Color/Classic Chrome, Recipe/Fuji X Weekly/Vibrant Arizona
 ```
 
 > [!NOTE]
-> Both tag values use the hierarchy option. Existing values in this hierchy will be deleted.
+> Both tag values are hierarchical. Existing values in this hierarchy are deleted.
 
 Write descripion:
 ```console
