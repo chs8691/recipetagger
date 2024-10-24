@@ -139,7 +139,7 @@ Processed all 2 image(s) successfully.
 
 No matching result updates the description, too:
 ```console
-$ python reciper.py -t=100 -d import/20240918-154512-1188-X-T50.jpg 
+$ python reciper.py -t=100 -d 1188-X-T50.jpg 
 44/44 recipes imported.
 Found 1 file(s).
     1 image files updated
@@ -149,7 +149,7 @@ Processed all 1 image(s) successfully.
 
 Result:
 ```console
-$ exiftool -b  -imagedescription  import/20240918-154512-1188-X-T50.jpg
+$ exiftool -b  -imagedescription  1188-X-T50.jpg
 Me an my dog.
 
 --- Recipe info ---
