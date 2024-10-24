@@ -138,8 +138,10 @@ def read_file(filename):
                     exif[R.BW_FILTER] = value
 
                 if exif[R.FILMSIMULATION] != FS.SEPIA:
+                    # Older cams just have BWAdjustment (T-30 ?)
                     field='MakerNotes:BWAdjustment'    # Monochromatic Color warm/cool
                     exif[R.BW_COLOR_WC] = d[field]
+                    # Newer cams also have BWMagentaGreen
                     field='MakerNotes:BWMagentaGreen'  # Monochromatic Color magenta/green
                     exif[R.BW_COLOR_MC] = d[field]
             

@@ -3,6 +3,10 @@ Mapping from Fujifilm X image settings to recipes. Optional tag it to the image 
 
 Recipes can be imported by csv file. See example file `recipes.csv`. There are great sources for recipes, like the marvellous [Fuji X Weekly](https://fujixweekly.com). 
 
+> [!NOTE]
+> This software uses recipes published on the website 'Fuji X Weekly' by Ritchie Roesch and other sources. The name of the recipe and its settings have been carefully copied into this project. However, no responsibility is taken for the correctness, completeness and up-to-dateness.
+
+
 THe script compares the exif data of one or more images with every recipe of the imported recipes to find the best matching recipe. If a recipe is found, that matchs better than the given threshold, the result can be written into the image description. You can also tag the image the recipe as keyword. 
 
 In addition, the image can be tagged with the film simulation name.
@@ -28,9 +32,20 @@ options:
   -k, --keywords        Update image keywords with recipe and filmsimulation
 ```
 
-### Supported cameras
+### Camera Compatibility
 
-Tested for X-T50 and X-S10. But every Fujifilm cameras with a X-sensor of generation V and IV should be working, too. 
+Tested for cameras X-T50 and X-S10. But every Fujifilm cameras with a X-sensor of generation V and IV should be working, too. But older camera models can have different tags or different tag values or not an tag at all. For instance the exif tag `MakerNotes:BWMagentaGreen` is missing in the X-T30.
+
+### Matching Qualitiy 
+
+Comparing EXIF data of an specific image with settings of an recipe is not easy and not clear-cut.
+
+The finding logic for the best matching recipe is based only on comparing values. To find the best matching recipe attributes are **weighted**. For instance the film simulation is more relevant than the sharpness value. The weighting is a subjective assessment. Future adjustments cannot be ruled out. 
+
+The value **deviation** is a percentage value of the setting range. The setting range may vary for different models. For instance _BW Tone_ on X-T30 has a range from -9 to +9 (B & W Adjustment), on X-T50 the range is from -18 to +18 (Monochromatic Color warm/cool). 
+
+The **recipes** can vary in precision. Not all setting values are always specified. They may or may not relate to a specific sensor generation.
+
 
 ## Installation
 
@@ -73,8 +88,8 @@ $ exiftool -tagslist import/770-X-T50.JPG
 Tags List : Fuji-X/Color/Classic Chrome, Recipe/Fuji X Weekly/Vibrant Arizona
 ```
 
-[!NOTE]
-Both tag values use the hierarchy option. Existing values in this hierchy will be deleted.
+> [!NOTE]
+> Both tag values use the hierarchy option. Existing values in this hierchy will be deleted.
 
 Write descripion:
 ```console
@@ -99,8 +114,8 @@ Divergent settings:
 - Highlights: 0 (1.5)
 ```
 
-[!NOTE]
-An existing description will not be overwritten. But all after `--- Recipe info ---` will be replaced.
+> [!NOTE]
+> An existing description will not be overwritten. But all after `--- Recipe info ---` will be replaced.
 
 Using wildcard...:
 ```console
