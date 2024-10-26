@@ -10,14 +10,19 @@ import constants.colorchrome as CC
 import constants.sensor as SR
 import constants.drangepriority as DRP
 import constants.dynamicrange as DR
-from os import path, listdir
+from os import path
 from glob import glob
 import subprocess
 
 # exiftool must be installed on the system
-from exiftool import ExifToolHelper, ExifTool 
+from exiftool import ExifToolHelper
 
 args=None
+
+# Replacement for args.verbose and .veryverbose 
+logmode = None
+LOG_V = 'v'
+LOG_VV = 'vv'
 
 recipes = [] 
 
@@ -33,18 +38,26 @@ RECIPE_ROOT = 'Recipe'
 # Description header is used to identify existing recipe info entries.
 HEADER = '\n\n--- Recipe info ---'
 
+
+def set_log_mode(mode):
+    """Set logmode with 'v' or 'vv'. """
+    global logmode
+    logmode = mode
+
+
 def log(message):
     """Logs to console in verbose mode"""
 
     # In unit tests args is None
-    if(args is None or args.verbose):
+    if(logmode == LOG_V or logmode == LOG_VV):
         print(message)
  
+
 def vvlog(message):
     """Logs to console in very verbose mode"""
 
     # In unit tests args is None
-    if(args is None or args.vverbose):
+    if(logmode == LOG_VV):
         print(message)
 
 def err(message):
@@ -70,7 +83,13 @@ def parse_args():
     parser.add_argument('file', metavar='FILE', type=str, nargs='+',
                     help='Image file(s), support glob syntax. Use Wildcards to select mltiples files or pass mulptiple file names.')
     
+
     args = parser.parse_args()
+
+    if args.verbose:
+        set_log_mode(LOG_V)
+    elif args.vverbose:
+        set_log_mode(LOG_VV)
 
 
 def import_recipes(filename):

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ConversionProfile application="XRFC" version="1.12.0.0">
+    <PropertyGroup device="X-T50" version="X-T50_0100" label="test-decimals">
+        <SerialNumber>593537323631240611172310123F99</SerialNumber>
+        <TetherRAWConditonCode>X-T50_0100</TetherRAWConditonCode>
+        <Editable>TRUE</Editable>
+        <SourceFileName/>
+        <Fileerror>NONE</Fileerror>
+        <RotationAngle>0</RotationAngle>
+        <StructVer>65536</StructVer>
+        <IOPCode>FF189504</IOPCode>
+        <ShootingCondition>OFF</ShootingCondition>
+        <FileType>JPG</FileType>
+        <ImageSize>L3x2</ImageSize>
+        <ImageQuality>Fine</ImageQuality>
+        <ExposureBias>0</ExposureBias>
+        <DynamicRange>400</DynamicRange>
+        <WideDRange>0</WideDRange>
+        <FilmSimulation>Classic</FilmSimulation>
+        <BlackImageTone>-1</BlackImageTone>
+        <MonochromaticColor_RG/>
+        <GrainEffect>WEAK</GrainEffect>
+        <GrainEffectSize>LARGE</GrainEffectSize>
+        <ChromeEffect>WEAK</ChromeEffect>
+        <ColorChromeBlue>STRONG</ColorChromeBlue>
+        <SmoothSkinEffect>WEAK</SmoothSkinEffect>
+        <WBShootCond>OFF</WBShootCond>
+        <WhiteBalance>Temperature</WhiteBalance>
+        <WBShiftR>-1</WBShiftR>
+        <WBShiftB>1</WBShiftB>
+        <WBColorTemp>7010K</WBColorTemp>
+        <HighlightTone>0.5</HighlightTone>
+        <ShadowTone>-0.5</ShadowTone>
+        <Color>1</Color>
+        <Sharpness>-1</Sharpness>
+        <NoisReduction>-1</NoisReduction>
+        <Clarity>1</Clarity>
+        <LensModulationOpt>ON</LensModulationOpt>
+        <ColorSpace>sRGB</ColorSpace>
+        <HDR/>
+        <DigitalTeleConv>OFF</DigitalTeleConv>
+        <PortraitEnhancer/>
+    </PropertyGroup>
+</ConversionProfile>

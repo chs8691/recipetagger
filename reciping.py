@@ -263,3 +263,10 @@ def map_filmsimulation(value):
     else:
         return None
     
+def split_grain_effect(value):
+    """Returns tuple with separated values for Rroughness and size"""
+
+    if value == G.OFF:
+        return (G.OFF, G.OFF)
+    else:
+        return value.split('/')

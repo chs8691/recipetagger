@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ConversionProfile application="XRFC" version="1.12.0.0">
+    <PropertyGroup device="X-T50" version="X-T50_0100" label="Fujicolor Super HG">
+        <SerialNumber>593537323631240611172310123F99</SerialNumber>
+        <TetherRAWConditonCode>X-T50_0100</TetherRAWConditonCode>
+        <Editable>TRUE</Editable>
+        <SourceFileName/>
+        <Fileerror>NONE</Fileerror>
+        <RotationAngle>0</RotationAngle>
+        <StructVer>65536</StructVer>
+        <IOPCode>FF189504</IOPCode>
+        <ShootingCondition>OFF</ShootingCondition>
+        <FileType>JPG</FileType>
+        <ImageSize>L3x2</ImageSize>
+        <ImageQuality>Fine</ImageQuality>
+        <ExposureBias>0</ExposureBias>
+        <DynamicRange>400</DynamicRange>
+        <WideDRange>0</WideDRange>
+        <FilmSimulation>ClassicNEGA</FilmSimulation>
+        <BlackImageTone>0</BlackImageTone>
+        <MonochromaticColor_RG>0</MonochromaticColor_RG>
+        <GrainEffect>WEAK</GrainEffect>
+        <GrainEffectSize>WEAK</GrainEffectSize>
+        <ChromeEffect>WEAK</ChromeEffect>
+        <ColorChromeBlue>WEAK</ColorChromeBlue>
+        <SmoothSkinEffect>OFF</SmoothSkinEffect>
+        <WBShootCond>OFF</WBShootCond>
+        <WhiteBalance>Auto_White</WhiteBalance>
+        <WBShiftR>-3</WBShiftR>
+        <WBShiftB>-1</WBShiftB>
+        <WBColorTemp>0</WBColorTemp>
+        <HighlightTone>-1.0</HighlightTone>
+        <ShadowTone>1.0</ShadowTone>
+        <Color>2</Color>
+        <Sharpness>0</Sharpness>
+        <NoisReduction>-4</NoisReduction>
+        <Clarity>2</Clarity>
+        <LensModulationOpt>ON</LensModulationOpt>
+        <ColorSpace>sRGB</ColorSpace>
+        <HDR/>
+        <DigitalTeleConv>OFF</DigitalTeleConv>
+    </PropertyGroup>
+</ConversionProfile>
