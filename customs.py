@@ -26,13 +26,14 @@ def search_tag(tag, lines):
     """Returns tuple with three values count, line number an value.  
     Count: number of occurances
     Line Number: Index of (last) occurances or, if count is 0, None. Starts with 0.
-    Value: value at line number or, if count is 0, None 
+    Value: value at line number. Is None, of tag without value or if count is 0 
     """
 
     count = 0
     value = None
     line_number = None
 
+    # Search for tag pair   
     p = re.compile(f'.*<{tag}>(.+?)</{tag}>.*') 
     cnt = 0   
     for l in lines:
@@ -45,6 +46,19 @@ def search_tag(tag, lines):
             count += 1
         cnt += 1
       
+    #  Search for single tag (non value)
+    if count == 0:
+        p = re.compile(f'.*<{tag}/>.*') 
+        cnt = 0   
+        for l in lines:
+            # vvlog(l)
+            m = p.match(l)
+            if m is not None:
+                vvlog(f'Found non value {tag} in line {cnt}')
+                line_number = cnt
+                count += 1
+            cnt += 1
+
     if count == 0:
         log(f'tag {tag} not found')
     
@@ -66,7 +80,8 @@ def update_tag(tag, value, lines):
 
     # Found tag exactly once  
     ret = lines
-    ret[line_number]=re.sub(f' {tag}="(.+?)"', f' {tag}="{value}"', lines[line_number])
+    # Tag can be a single Tag or enclosed tag
+    ret[line_number]=re.sub(f'<{tag}.*>', f'<{tag}>{value}</{tag}>', lines[line_number])
     return ret
 
 
@@ -181,7 +196,7 @@ def create_custom(recipe, lines):
     field = R.KELVIN
     value = '0'
     if field in recipe: 
-        value = recipe[field]
+        value = map_kelvin(recipe[field])
     tag = 'WBColorTemp'
     ret = update_tag(tag, value, ret)     
     
@@ -262,6 +277,12 @@ def write_custom(custom, outdir, name):
         return 1
     
     return 0
+
+
+def map_kelvin(recipe_value):
+    """Returns custom settings value for the give recipe value"""
+
+    return f'{recipe_value}K'
 
 
 def map_dynamicrange(recipe_value):

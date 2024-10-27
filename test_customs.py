@@ -2,10 +2,6 @@ import pytest
 from customs import read_template
 from customs import create_custom
 from customs import search_tag
-from customs import map_drpriority
-from customs import map_dynamicrange
-from customs import map_filmsimulation
-from customs import map_whitebalance
 from constants import recipefields as R
 from constants import dynamicrange as DR
 from constants import recipefields as R
@@ -60,8 +56,8 @@ def test_min(cam):
               R.CCR_EFFECT:CC.WEAK,
               R.CCRFX_BLUE:CC.STRONG,
               R.WHITE_BALANCE:WB.KELVIN,
-              R.WHITE_BALANCE_R:'-1',
-              R.WHITE_BALANCE_B:'1',
+              R.WHITE_BALANCE_R:'-9',
+              R.WHITE_BALANCE_B:'-9',
               R.KELVIN:'7010',
               R.GRAIN_EFFECT:GR.OFF,
               R.CCR_EFFECT:CC.OFF,
@@ -76,7 +72,7 @@ def test_min(cam):
               R.CLARITY:'-5',
               }
 
-    act = create_custom(recipe, tlines)
+    act_lines = create_custom(recipe, tlines)
 
     (exp_cam, exp_lines) = read_template(exp_file)
 
@@ -85,31 +81,125 @@ def test_min(cam):
     field = R.DYNAMIC_RANGE
     tag = C.DYNAMIC_RANGE
     ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    assert exp_count == 1
-    assert exp_value == map_dynamicrange(recipe[field])
+    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
+    assert act_count == 1
+    assert act_value == exp_value
     
     field = R.DRANGE_PRIORITY
     tag = C.WIDE_D_RANGE
     ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    assert exp_count == 1
-    assert exp_value == map_drpriority(recipe[field])
+    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
+    assert act_count == 1
+    assert act_value == exp_value
 
     field = R.FILMSIMULATION
     tag = C.FILM_SIMULATION
     ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    assert exp_count == 1
-    assert exp_value == map_filmsimulation(recipe[field])
+    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
+    assert act_count == 1
+    assert act_value == exp_value
 
     field = R.BW_COLOR_WC
     tag = C.BLACK_IMAGE_TONE
     ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    assert exp_count == 1
-    assert exp_value == recipe[field]
+    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
+    assert act_count == 1
+    assert act_value == exp_value
 
     field = R.BW_COLOR_MC
     tag = C.MONOCHROMATIC_COLOR_RG
     ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    assert exp_count == 1
-    assert exp_value == recipe[field]
+    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
+    assert act_count == 1
+    assert act_value == exp_value
 
+    field = R.GRAIN_EFFECT
+    tag = C.GRAIN_EFFECT
+    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
+    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
+    assert act_count == 1
+    assert act_value == exp_value
 
+    field = R.CCR_EFFECT
+    tag = C.CHROME_EFFECT
+    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
+    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
+    assert act_count == 1
+    assert act_value == exp_value
+
+    field = R.CCRFX_BLUE
+    tag = C.COLOR_CHROME_BLUE
+    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
+    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
+    assert act_count == 1
+    assert act_value == exp_value
+
+    field = R.WHITE_BALANCE
+    tag = C.WHITE_BALANCE
+    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
+    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
+    assert act_count == 1
+    assert act_value == exp_value
+
+    field = R.WHITE_BALANCE_R
+    tag = C.WB_SHIFT_R
+    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
+    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
+    assert act_count == 1
+    assert act_value == exp_value
+
+    field = R.WHITE_BALANCE_B
+    tag = C.WB_SHIFT_B
+    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
+    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
+    assert act_count == 1
+    assert act_value == exp_value
+
+    field = R.KELVIN
+    tag = C.WB_COLOR_TEMP
+    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
+    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
+    assert act_count == 1
+    assert act_value == exp_value
+
+    field = R.HIGHLIGHTS
+    tag = C.HIGHLIGHT_TONE
+    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
+    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
+    assert act_count == 1
+    assert act_value == exp_value
+
+    field = R.SHADOWS
+    tag = C.SHADOW_TONE
+    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
+    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
+    assert act_count == 1
+    assert act_value == exp_value
+
+    field = R.COLOR
+    tag = C.COLOR
+    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
+    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
+    assert act_count == 1
+    assert act_value == exp_value
+
+    field = R.SHARPNESS
+    tag = C.SHARPNESS
+    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
+    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
+    assert act_count == 1
+    assert act_value == exp_value
+
+    field = R.HIGH_ISONR
+    tag = C.NOIS_REDUCTION
+    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
+    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
+    assert act_count == 1
+    assert act_value == exp_value
+
+    field = R.CLARITY
+    tag = C.CLARITY
+    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
+    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
+    assert act_count == 1
+    assert act_value == exp_value
