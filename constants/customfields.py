@@ -1,3 +1,4 @@
+LABEL                  = 'label'
 BLACK_IMAGE_TONE       = 'BlackImageTone'                          
 CHROME_EFFECT          = 'ChromeEffect'                   
 CLARITY                = 'Clarity'                   

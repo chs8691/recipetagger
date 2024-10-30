@@ -31,7 +31,7 @@
         <WBColorTemp>10000K</WBColorTemp>
         <HighlightTone>4</HighlightTone>
         <ShadowTone>4</ShadowTone>
-        <Color>-4</Color>
+        <Color>4</Color>
         <Sharpness>4</Sharpness>
         <NoisReduction>4</NoisReduction>
         <Clarity>5</Clarity>

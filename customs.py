@@ -21,6 +21,16 @@ from constants import customfields as C
 
 args = None
 
+def get_null_value(tag):
+    """Returns the value for a not set <MonochromaticColor_RG/> or an empty string 
+    for unknown tags.    
+    Hint: For every tag that can be an non-set tag, there must be an entry here. 
+    """
+    match tag:
+        case C.MONOCHROMATIC_COLOR_RG:
+            return '0'
+        
+    return ''
 
 def search_tag(tag, lines):
     """Returns tuple with three values count, line number an value.  
@@ -57,6 +67,7 @@ def search_tag(tag, lines):
                 vvlog(f'Found non value {tag} in line {cnt}')
                 line_number = cnt
                 count += 1
+                value = get_null_value(tag)
             cnt += 1
 
     if count == 0:
@@ -64,6 +75,35 @@ def search_tag(tag, lines):
     
     return (count, line_number, value)
     
+
+def search_propertyGroup(tag, lines):
+    """Returns tuple with three values count, line number an value.  
+    Count: number of occurances
+    Line Number: Index of (last) occurances or, if count is 0, None. Starts with 0.
+    Value: value at line number. Is None, of tag without value or if count is 0 
+    """
+    count = 0
+    value = None
+    line_number = None
+
+    p = re.compile(f'.*<PropertyGroup.* {tag}="(.+?)".*>.*') 
+    cnt = 0   
+    found = False
+    for l in lines:
+        # vvlog(l)
+        m = p.match(l)
+        if m is not None and m.lastindex > 0:
+            vvlog(f'Found {tag}={m.group(1)}')
+            value = m.group(1)
+            line_number = cnt
+            count += 1
+        cnt += 1            
+      
+    if not found:
+        log(f'tag {tag} not found')
+    
+    return (count, line_number, value)
+
 
 def update_tag(tag, value, lines):
     """Returns updated lines if the give tag was found."""
@@ -87,33 +127,30 @@ def update_tag(tag, value, lines):
 
 def update_propertyGroup(tag, value, lines):
     """Returns updated lines if the give property was found."""
-    ret = lines
 
-    p = re.compile(f'.*<PropertyGroup.* {tag}="(.+?)".*>.*') 
-    cnt = 0   
-    found = False
-    for l in lines:
-        # vvlog(l)
-        m = p.match(l)
-        if m is not None and m.lastindex > 0:
-            vvlog(f'Found {tag}={m.group(1)}')
-            lines[cnt]=re.sub(f' {tag}="(.+?)"', f' {tag}="{value}"',l)
-            vvlog(f'Set {tag}={value}: {lines[cnt]}')
-            found = True
-            break
-        cnt += 1
-      
-    if not found:
-        log(f'tag {tag} not found')
-    
-    return ret 
+    (count, line_number, old_value) = search_propertyGroup(tag, lines)
+
+    if count == 0:
+        log(f'tag {tag} not found. Skipping.')
+        return lines
+
+    if count > 1:
+        log(f'tag {tag} not unique. Skipping.')
+        return lines
+
+    # Found tag exactly once  
+    ret = lines
+    # Tag can be a single Tag or enclosed tag
+    ret[line_number]=re.sub(f' {tag}="(.+?)"', f' {tag}="{value}"', lines[line_number])
+    return ret
+
 
 def create_custom(recipe, lines):
     """Create custom setting data for the give recipe by using the template string. 
     Returns string list with custom settings."""
     ret = lines
 
-    update_propertyGroup('label', recipe[R.NAME], ret)
+    update_propertyGroup(C.LABEL, recipe[R.NAME], ret)
 
     tag = C.DYNAMIC_RANGE
     value = 'OFF'
@@ -156,7 +193,7 @@ def create_custom(recipe, lines):
     tag = C.GRAIN_EFFECT
     ret = update_tag(tag, value, ret)
     tag = C.GRAIN_EFFECT_SIZE
-    ret = update_tag(tag, value, ret)
+    ret = update_tag(tag, value2, ret)
 
     field = R.CCR_EFFECT
     value = CC.OFF

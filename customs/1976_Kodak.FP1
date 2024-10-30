@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ConversionProfile application="XRFC" version="1.12.0.0">
-    <PropertyGroup device="X-T50" version="X-T50_0100" label="1976_Kodak">
+    <PropertyGroup device="X-T50" version="X-T50_0100" label="1976 Kodak">
         <SerialNumber>593537323631240611172310123F99</SerialNumber>
         <TetherRAWConditonCode>X-T50_0100</TetherRAWConditonCode>
         <Editable>TRUE</Editable>

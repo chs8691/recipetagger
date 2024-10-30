@@ -28,7 +28,7 @@
         <WhiteBalance>Temperature</WhiteBalance>
         <WBShiftR>9</WBShiftR>
         <WBShiftB>-5</WBShiftB>
-        <WBColorTemp>7700</WBColorTemp>
+        <WBColorTemp>7700K</WBColorTemp>
         <HighlightTone>-0.5</HighlightTone>
         <ShadowTone>1.5</ShadowTone>
         <Color>3</Color>
