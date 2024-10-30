@@ -74,124 +74,65 @@ def test_decimals_with_mid_template(cam):
 
     (exp_cam, exp_lines) = read_template(exp_file)
 
-    tag = C.LABEL
-    ((exp_count, exp_index, exp_value)) = search_propertyGroup(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_propertyGroup(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
+    (exp_value, act_value, act_count) = getProperty(C.LABEL, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+    
+    (exp_value, act_value, act_count) = get(C.DYNAMIC_RANGE, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+    
+    (exp_value, act_value, act_count) = get(C.WIDE_D_RANGE, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
 
-    tag = C.DYNAMIC_RANGE
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
+    (exp_value, act_value, act_count) = get(C.FILM_SIMULATION, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
 
-    tag = C.WIDE_D_RANGE
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
+    (exp_value, act_value, act_count) = get(C.BLACK_IMAGE_TONE, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
 
-    tag = C.FILM_SIMULATION
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
+    (exp_value, act_value, act_count) = get(C.MONOCHROMATIC_COLOR_RG, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
 
-    tag = C.BLACK_IMAGE_TONE
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
+    (exp_value, act_value, act_count) = get(C.GRAIN_EFFECT, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
 
-    tag = C.MONOCHROMATIC_COLOR_RG
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
+    (exp_value, act_value, act_count) = get(C.GRAIN_EFFECT_SIZE, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
 
-    tag = C.GRAIN_EFFECT
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
+    (exp_value, act_value, act_count) = get(C.CHROME_EFFECT, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
 
-    tag = C.GRAIN_EFFECT_SIZE
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
+    (exp_value, act_value, act_count) = get(C.COLOR_CHROME_BLUE, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
 
-    tag = C.CHROME_EFFECT
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
+    (exp_value, act_value, act_count) = get(C.WHITE_BALANCE, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
 
-    tag = C.COLOR_CHROME_BLUE
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
+    (exp_value, act_value, act_count) = get(C.WB_SHIFT_R, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
 
-    tag = C.WHITE_BALANCE
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
+    (exp_value, act_value, act_count) = get(C.WB_SHIFT_B, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
 
-    tag = C.WB_SHIFT_R
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
+    (exp_value, act_value, act_count) = get(C.WB_COLOR_TEMP, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
 
-    tag = C.WB_SHIFT_B
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
+    (exp_value, act_value, act_count) = get(C.HIGHLIGHT_TONE, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
 
-    tag = C.WB_COLOR_TEMP
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_value == exp_value
+    (exp_value, act_value, act_count) = get(C.SHADOW_TONE, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
 
-    tag = C.HIGHLIGHT_TONE
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
+    (exp_value, act_value, act_count) = get(C.COLOR, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
 
-    tag = C.SHADOW_TONE
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
+    (exp_value, act_value, act_count) = get(C.SHARPNESS, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
 
-    tag = C.COLOR
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
+    (exp_value, act_value, act_count) = get(C.NOIS_REDUCTION, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
 
-    tag = C.SHARPNESS
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
-
-    tag = C.NOIS_REDUCTION
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
-
-    tag = C.CLARITY
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
+    (exp_value, act_value, act_count) = get(C.CLARITY, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
 
 @pytest.mark.parametrize("cam", cameras)
 def test_max_with_min_template(cam):
@@ -219,9 +160,9 @@ def test_max_with_min_template(cam):
               R.CCR_EFFECT:CC.STRONG,
               R.CCRFX_BLUE:CC.STRONG,
               R.WHITE_BALANCE:WB.DAYLIGHT,
-              R.KELVIN:'10000',
               R.WHITE_BALANCE_R:'9',
               R.WHITE_BALANCE_B:'9',
+              R.KELVIN:'10000',
               R.HIGHLIGHTS:'4',
               R.SHADOWS:'4',
               R.COLOR:'4',
@@ -234,117 +175,81 @@ def test_max_with_min_template(cam):
 
     (exp_cam, exp_lines) = read_template(exp_file)
     
-    field = R.DYNAMIC_RANGE
-    tag = C.DYNAMIC_RANGE
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
+    (exp_value, act_value, act_count) = getProperty(C.LABEL, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
     
-    field = R.DRANGE_PRIORITY
-    tag = C.WIDE_D_RANGE
+    (exp_value, act_value, act_count) = get(C.DYNAMIC_RANGE, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+    
+    (exp_value, act_value, act_count) = get(C.WIDE_D_RANGE, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+
+    (exp_value, act_value, act_count) = get(C.FILM_SIMULATION, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+
+    (exp_value, act_value, act_count) = get(C.BLACK_IMAGE_TONE, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+
+    (exp_value, act_value, act_count) = get(C.MONOCHROMATIC_COLOR_RG, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+
+    (exp_value, act_value, act_count) = get(C.GRAIN_EFFECT, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+
+    (exp_value, act_value, act_count) = get(C.GRAIN_EFFECT_SIZE, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+
+    (exp_value, act_value, act_count) = get(C.CHROME_EFFECT, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+
+    (exp_value, act_value, act_count) = get(C.COLOR_CHROME_BLUE, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+
+    (exp_value, act_value, act_count) = get(C.WHITE_BALANCE, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+
+    (exp_value, act_value, act_count) = get(C.WB_SHIFT_R, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+
+    (exp_value, act_value, act_count) = get(C.WB_SHIFT_B, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+
+    (exp_value, act_value, act_count) = get(C.WB_COLOR_TEMP, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+
+    (exp_value, act_value, act_count) = get(C.HIGHLIGHT_TONE, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+
+    (exp_value, act_value, act_count) = get(C.SHADOW_TONE, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+
+    (exp_value, act_value, act_count) = get(C.COLOR, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+
+    (exp_value, act_value, act_count) = get(C.SHARPNESS, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+
+    (exp_value, act_value, act_count) = get(C.NOIS_REDUCTION, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+
+    (exp_value, act_value, act_count) = get(C.CLARITY, exp_lines, act_lines)
+    assert act_count == 1 and act_value == exp_value
+
+
+def get(tag, exp_lines, act_lines):
+    """Boiler plate facade"""
     ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
     ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
 
-    field = R.FILMSIMULATION
-    tag = C.FILM_SIMULATION
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
+    return (exp_value, act_value, act_count)
 
-    tag = C.BLACK_IMAGE_TONE
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
 
-    tag = C.MONOCHROMATIC_COLOR_RG
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
+def getProperty(tag, exp_lines, act_lines):
+    """Boiler plate facade"""
+    ((exp_count, exp_index, exp_value)) = search_propertyGroup(tag, exp_lines)
+    ((act_count, act_index, act_value)) = search_propertyGroup(tag, act_lines)
 
-    tag=C.GRAIN_EFFECT
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
-
-    tag=C.GRAIN_EFFECT_SIZE
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
-
-    tag = C.CHROME_EFFECT
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
-
-    tag = C.COLOR_CHROME_BLUE
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    assert act_count == 1
-    assert act_value == exp_value
-
-    tag = C.WHITE_BALANCE
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
-
-    tag = C.WB_SHIFT_R
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
-
-    tag = C.WB_SHIFT_B
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
-
-    tag = C.WB_COLOR_TEMP
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
-
-    tag = C.HIGHLIGHT_TONE
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
-
-    tag = C.SHADOW_TONE
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
-
-    tag = C.COLOR
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
-
-    tag = C.SHARPNESS
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
-
-    tag = C.NOIS_REDUCTION
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
-
-    tag = C.CLARITY
-    ((exp_count, exp_index, exp_value)) = search_tag(tag, exp_lines)
-    ((act_count, act_index, act_value)) = search_tag(tag, act_lines)
-    assert act_count == 1
-    assert act_value == exp_value
+    return (exp_value, act_value, act_count)
 
 
 @pytest.mark.parametrize("cam", cameras)

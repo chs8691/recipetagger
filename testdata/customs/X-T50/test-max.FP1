@@ -23,7 +23,7 @@
         <GrainEffectSize>LARGE</GrainEffectSize>
         <ChromeEffect>STRONG</ChromeEffect>
         <ColorChromeBlue>STRONG</ColorChromeBlue>
-        <SmoothSkinEffect>STRONG</SmoothSkinEffect>
+        <SmoothSkinEffect>OFF</SmoothSkinEffect>
         <WBShootCond>OFF</WBShootCond>
         <WhiteBalance>Daylight</WhiteBalance>
         <WBShiftR>9</WBShiftR>
