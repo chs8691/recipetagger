@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ConversionProfile application="XRFC" version="1.12.0.0">
-    <PropertyGroup device="X-T50" version="X-T50_0100" label="Thommy’s Ektachrome">
+    <PropertyGroup device="X-T50" version="X-T50_0100" label="Superia Xtra 400">
         <SerialNumber>593537323631240611172310123F99</SerialNumber>
         <TetherRAWConditonCode>X-T50_0100</TetherRAWConditonCode>
         <Editable>TRUE</Editable>
@@ -14,24 +14,24 @@
         <ImageSize>L3x2</ImageSize>
         <ImageQuality>Fine</ImageQuality>
         <ExposureBias>0</ExposureBias>
-        <DynamicRange>100</DynamicRange>
+        <DynamicRange>400</DynamicRange>
         <WideDRange>0</WideDRange>
-        <FilmSimulation>NostalgicNEGA</FilmSimulation>
-        <BlackImageTone>0</BlackImageTone>
-        <MonochromaticColor_RG>0</MonochromaticColor_RG>
-        <GrainEffect>WEAK</GrainEffect>
-        <GrainEffectSize>WEAK</GrainEffectSize>
-        <ChromeEffect>WEAK</ChromeEffect>
-        <ColorChromeBlue>OFF</ColorChromeBlue>
+        <FilmSimulation>ClassicNEGA</FilmSimulation>
+        <BlackImageTone>18</BlackImageTone>
+        <MonochromaticColor_RG>18</MonochromaticColor_RG>
+        <GrainEffect>STRONG</GrainEffect>
+        <GrainEffectSize>SMALL</GrainEffectSize>
+        <ChromeEffect>OFF</ChromeEffect>
+        <ColorChromeBlue>WEAK</ColorChromeBlue>
         <SmoothSkinEffect>OFF</SmoothSkinEffect>
         <WBShootCond>OFF</WBShootCond>
-        <WhiteBalance>Temperature</WhiteBalance>
-        <WBShiftR>-1</WBShiftR>
-        <WBShiftB>3</WBShiftB>
-        <WBColorTemp>5000K</WBColorTemp>
-        <HighlightTone>1.5</HighlightTone>
-        <ShadowTone>1.5</ShadowTone>
-        <Color>1</Color>
+        <WhiteBalance>Auto_White</WhiteBalance>
+        <WBShiftR>3</WBShiftR>
+        <WBShiftB>-5</WBShiftB>
+        <WBColorTemp>6500K</WBColorTemp>
+        <HighlightTone>0</HighlightTone>
+        <ShadowTone>-1</ShadowTone>
+        <Color>4</Color>
         <Sharpness>-1</Sharpness>
         <NoisReduction>-4</NoisReduction>
         <Clarity>-2</Clarity>
@@ -39,5 +39,6 @@
         <ColorSpace>sRGB</ColorSpace>
         <HDR/>
         <DigitalTeleConv>OFF</DigitalTeleConv>
+        <PortraitEnhancer/>
     </PropertyGroup>
 </ConversionProfile>

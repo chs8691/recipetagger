@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ConversionProfile application="XRFC" version="1.12.0.0">
-    <PropertyGroup device="X-T50" version="X-T50_0100" label="Kodak Ektachrome E100VS v2">
-        <SerialNumber>593537323631240611172310123F99</SerialNumber>
-        <TetherRAWConditonCode>X-T50_0100</TetherRAWConditonCode>
+    <PropertyGroup device="X-S10" version="X-S10_0100" label="test-max">
+        <SerialNumber>593536323031201208C713103174C4</SerialNumber>
+        <TetherRAWConditonCode>X-S10_0100</TetherRAWConditonCode>
         <Editable>TRUE</Editable>
         <SourceFileName/>
         <Fileerror>NONE</Fileerror>
         <RotationAngle>0</RotationAngle>
         <StructVer>65536</StructVer>
-        <IOPCode>FF189504</IOPCode>
+        <IOPCode>FF159506</IOPCode>
         <ShootingCondition>OFF</ShootingCondition>
         <FileType>JPG</FileType>
         <ImageSize>L3x2</ImageSize>
@@ -16,28 +16,29 @@
         <ExposureBias>0</ExposureBias>
         <DynamicRange>400</DynamicRange>
         <WideDRange>0</WideDRange>
-        <FilmSimulation>Velvia</FilmSimulation>
-        <BlackImageTone>0</BlackImageTone>
-        <MonochromaticColor_RG>0</MonochromaticColor_RG>
+        <FilmSimulation>BW</FilmSimulation>
+        <BlackImageTone>18</BlackImageTone>
+        <MonochromaticColor_RG>18</MonochromaticColor_RG>
         <GrainEffect>STRONG</GrainEffect>
-        <GrainEffectSize>STRONG</GrainEffectSize>
+        <GrainEffectSize>LARGE</GrainEffectSize>
         <ChromeEffect>STRONG</ChromeEffect>
         <ColorChromeBlue>STRONG</ColorChromeBlue>
         <SmoothSkinEffect>OFF</SmoothSkinEffect>
         <WBShootCond>OFF</WBShootCond>
-        <WhiteBalance>Auto</WhiteBalance>
-        <WBShiftR>2</WBShiftR>
-        <WBShiftB>-2</WBShiftB>
-        <WBColorTemp>0</WBColorTemp>
-        <HighlightTone>1.0</HighlightTone>
-        <ShadowTone>1.0</ShadowTone>
-        <Color>2</Color>
-        <Sharpness>1</Sharpness>
-        <NoisReduction>-2</NoisReduction>
-        <Clarity>1</Clarity>
+        <WhiteBalance>Daylight</WhiteBalance>
+        <WBShiftR>9</WBShiftR>
+        <WBShiftB>9</WBShiftB>
+        <WBColorTemp>10000K</WBColorTemp>
+        <HighlightTone>4</HighlightTone>
+        <ShadowTone>4</ShadowTone>
+        <Color>4</Color>
+        <Sharpness>4</Sharpness>
+        <NoisReduction>4</NoisReduction>
+        <Clarity>5</Clarity>
         <LensModulationOpt>ON</LensModulationOpt>
         <ColorSpace>sRGB</ColorSpace>
         <HDR/>
-        <DigitalTeleConv>OFF</DigitalTeleConv>
+        <DigitalTeleConv/>
+        <PortraitEnhancer/>
     </PropertyGroup>
 </ConversionProfile>

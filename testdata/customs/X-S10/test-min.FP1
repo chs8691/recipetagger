@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ConversionProfile application="XRFC" version="1.12.0.0">
+    <PropertyGroup device="X-S10" version="X-S10_0100" label="test-min">
+        <SerialNumber>593536323031201208C713103174C4</SerialNumber>
+        <TetherRAWConditonCode>X-S10_0100</TetherRAWConditonCode>
+        <Editable>TRUE</Editable>
+        <SourceFileName/>
+        <Fileerror>NONE</Fileerror>
+        <RotationAngle>0</RotationAngle>
+        <StructVer>65536</StructVer>
+        <IOPCode>FF159506</IOPCode>
+        <ShootingCondition>OFF</ShootingCondition>
+        <FileType>JPG</FileType>
+        <ImageSize>L3x2</ImageSize>
+        <ImageQuality>Fine</ImageQuality>
+        <ExposureBias>0</ExposureBias>
+        <DynamicRange>100</DynamicRange>
+        <WideDRange>P1</WideDRange>
+        <FilmSimulation>Provia</FilmSimulation>
+        <BlackImageTone>-18</BlackImageTone>
+        <MonochromaticColor_RG>-18</MonochromaticColor_RG>
+        <GrainEffect>OFF</GrainEffect>
+        <GrainEffectSize>SMALL</GrainEffectSize>
+        <ChromeEffect>OFF</ChromeEffect>
+        <ColorChromeBlue>OFF</ColorChromeBlue>
+        <SmoothSkinEffect>OFF</SmoothSkinEffect>
+        <WBShootCond>OFF</WBShootCond>
+        <WhiteBalance>Temperature</WhiteBalance>
+        <WBShiftR>-9</WBShiftR>
+        <WBShiftB>-9</WBShiftB>
+        <WBColorTemp>2500K</WBColorTemp>
+        <HighlightTone>-2</HighlightTone>
+        <ShadowTone>-2</ShadowTone>
+        <Color>-4</Color>
+        <Sharpness>-4</Sharpness>
+        <NoisReduction>-4</NoisReduction>
+        <Clarity>-5</Clarity>
+        <LensModulationOpt>ON</LensModulationOpt>
+        <ColorSpace>sRGB</ColorSpace>
+        <HDR/>
+        <DigitalTeleConv/>
+        <PortraitEnhancer/>
+    </PropertyGroup>
+</ConversionProfile>

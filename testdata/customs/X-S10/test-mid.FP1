@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ConversionProfile application="XRFC" version="1.12.0.0">
-    <PropertyGroup device="X-T50" version="X-T50_0100" label="CineStill 400D v1">
-        <SerialNumber>593537323631240611172310123F99</SerialNumber>
-        <TetherRAWConditonCode>X-T50_0100</TetherRAWConditonCode>
+    <PropertyGroup device="X-S10" version="X-S10_0100" label="test-mid">
+        <SerialNumber>593536323031201208C713103174C4</SerialNumber>
+        <TetherRAWConditonCode>X-S10_0100</TetherRAWConditonCode>
         <Editable>TRUE</Editable>
         <SourceFileName/>
         <Fileerror>NONE</Fileerror>
         <RotationAngle>0</RotationAngle>
         <StructVer>65536</StructVer>
-        <IOPCode>FF189504</IOPCode>
+        <IOPCode>FF159506</IOPCode>
         <ShootingCondition>OFF</ShootingCondition>
         <FileType>JPG</FileType>
         <ImageSize>L3x2</ImageSize>
@@ -19,25 +19,26 @@
         <FilmSimulation>Astia</FilmSimulation>
         <BlackImageTone>0</BlackImageTone>
         <MonochromaticColor_RG>0</MonochromaticColor_RG>
-        <GrainEffect>STRONG</GrainEffect>
-        <GrainEffectSize>STRONG</GrainEffectSize>
-        <ChromeEffect>STRONG</ChromeEffect>
-        <ColorChromeBlue>STRONG</ColorChromeBlue>
+        <GrainEffect>WEAK</GrainEffect>
+        <GrainEffectSize>SMALL</GrainEffectSize>
+        <ChromeEffect>WEAK</ChromeEffect>
+        <ColorChromeBlue>WEAK</ColorChromeBlue>
         <SmoothSkinEffect>OFF</SmoothSkinEffect>
         <WBShootCond>OFF</WBShootCond>
-        <WhiteBalance>Auto</WhiteBalance>
-        <WBShiftR>-6</WBShiftR>
-        <WBShiftB>-3</WBShiftB>
-        <WBColorTemp>0</WBColorTemp>
-        <HighlightTone>3.0</HighlightTone>
-        <ShadowTone>1.0</ShadowTone>
-        <Color>2</Color>
-        <Sharpness>-2</Sharpness>
-        <NoisReduction>-4</NoisReduction>
-        <Clarity>-4</Clarity>
+        <WhiteBalance>Temperature</WhiteBalance>
+        <WBShiftR>0</WBShiftR>
+        <WBShiftB>0</WBShiftB>
+        <WBColorTemp>5500K</WBColorTemp>
+        <HighlightTone>0</HighlightTone>
+        <ShadowTone>0</ShadowTone>
+        <Color>0</Color>
+        <Sharpness>0</Sharpness>
+        <NoisReduction>0</NoisReduction>
+        <Clarity>0</Clarity>
         <LensModulationOpt>ON</LensModulationOpt>
         <ColorSpace>sRGB</ColorSpace>
         <HDR/>
-        <DigitalTeleConv>OFF</DigitalTeleConv>
+        <DigitalTeleConv/>
+        <PortraitEnhancer/>
     </PropertyGroup>
 </ConversionProfile>

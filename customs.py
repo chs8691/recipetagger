@@ -231,7 +231,8 @@ def create_custom(recipe, lines):
     ret = update_tag(tag, value, ret)
       
     field = R.KELVIN
-    value = '0'
+    # Temperature with '0' makes the custom settings unusable
+    value = map_kelvin('5500')
     if field in recipe: 
         value = map_kelvin(recipe[field])
     tag = 'WBColorTemp'

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ConversionProfile application="XRFC" version="1.12.0.0">
-    <PropertyGroup device="X-T50" version="X-T50_0100" label="Vibrant Arizona">
+    <PropertyGroup device="X-T50" version="X-T50_0100" label="Expired ECN-2 100T">
         <SerialNumber>593537323631240611172310123F99</SerialNumber>
         <TetherRAWConditonCode>X-T50_0100</TetherRAWConditonCode>
         <Editable>TRUE</Editable>
@@ -14,30 +14,31 @@
         <ImageSize>L3x2</ImageSize>
         <ImageQuality>Fine</ImageQuality>
         <ExposureBias>0</ExposureBias>
-        <DynamicRange>OFF</DynamicRange>
-        <WideDRange>P2</WideDRange>
-        <FilmSimulation>Classic</FilmSimulation>
+        <DynamicRange>400</DynamicRange>
+        <WideDRange>0</WideDRange>
+        <FilmSimulation>BleachBypass</FilmSimulation>
         <BlackImageTone>0</BlackImageTone>
         <MonochromaticColor_RG>0</MonochromaticColor_RG>
-        <GrainEffect>WEAK</GrainEffect>
-        <GrainEffectSize>WEAK</GrainEffectSize>
-        <ChromeEffect>OFF</ChromeEffect>
-        <ColorChromeBlue>WEAK</ColorChromeBlue>
-        <SmoothSkinEffect>OFF</SmoothSkinEffect>
+        <GrainEffect>STRONG</GrainEffect>
+        <GrainEffectSize>LARGE</GrainEffectSize>
+        <ChromeEffect>STRONG</ChromeEffect>
+        <ColorChromeBlue>STRONG</ColorChromeBlue>
+        <SmoothSkinEffect>WEAK</SmoothSkinEffect>
         <WBShootCond>OFF</WBShootCond>
         <WhiteBalance>Temperature</WhiteBalance>
-        <WBShiftR>6</WBShiftR>
-        <WBShiftB>-8</WBShiftB>
-        <WBColorTemp>4350K</WBColorTemp>
-        <HighlightTone>0</HighlightTone>
-        <ShadowTone>0</ShadowTone>
-        <Color>4</Color>
-        <Sharpness>-2</Sharpness>
+        <WBShiftR>9</WBShiftR>
+        <WBShiftB>-6</WBShiftB>
+        <WBColorTemp>6000K</WBColorTemp>
+        <HighlightTone>0.5</HighlightTone>
+        <ShadowTone>-1</ShadowTone>
+        <Color>1</Color>
+        <Sharpness>-3</Sharpness>
         <NoisReduction>-4</NoisReduction>
-        <Clarity>-3</Clarity>
+        <Clarity>-4</Clarity>
         <LensModulationOpt>ON</LensModulationOpt>
         <ColorSpace>sRGB</ColorSpace>
         <HDR/>
         <DigitalTeleConv>OFF</DigitalTeleConv>
+        <PortraitEnhancer/>
     </PropertyGroup>
 </ConversionProfile>
