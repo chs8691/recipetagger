@@ -1,22 +1,45 @@
 # recipetagger
 A small set of tools to manage recipes for Fujfilm X cameras:
 
-* Search best matching recipe for a Fujifilm X image. Optional update image's description and keyword.
-* Create customer settings files from recipes.
+* **reciper.py** - Search best matching recipe for a Fujifilm X image. Optional update image's description and keyword.
+* **customs.py** - Copies the recipes to customer settings files (`FP1`) for Fujifilm X RAW Studio. Tested with X RAW Studio 1.25.0.1.
+* **converter.py** - Example script to convert recipes into the import CSV-format.  
 
-Recipes are stored as csv file. See example file `recipes.csv`. There are great sources for recipes, like the marvellous [Fuji X Weekly](https://fujixweekly.com). 
+Recipes must be stored in a csv file. See example file `recipes.csv`. There are great sources for recipes, like the marvellous [Fuji X Weekly](https://fujixweekly.com). 
 
 > [!NOTE]
 > This software uses recipes published on the website 'Fuji X Weekly' by Ritchie Roesch and other sources. The name of the recipe and its settings have been carefully copied into this project. However, no responsibility is taken for the correctness, completeness and up-to-dateness.
 
 
-The script compares the exif data of one or more images with the recipes from the CSV file. The best matching recipe will be searched. If a recipe is found, that matchs better than the given threshold, the result can be written into the image description. You can also tag the image the recipe as keyword. 
+The **reciper** script compares the exif data of one or more images with the recipes from the CSV file. The best matching recipe will be searched. If a recipe is found, that matchs better than the given threshold, the result can be written into the image description. You can also tag the image the recipe as keyword. 
 
 In addition, the image can be tagged with the film simulation name.
 
-### man
+The **customs** script creates for every recipe in the CSV file a `FP1` file. For this an existing FP1 file for your camera is needed as template file. Copy this files into your camera's sub directory of your Fujifilm X RAW Studio installation. For instance, on MacOS the directory is for X-T50 camera
 
-#### reciper
+```text
+~/Library/Application Support/com.fujifilm.denji/X RAW STUDIO/X-T50/X-T50_0100
+```
+
+The **converter** script is a simple tool to convert recipes file from a properitary csv to the reciper's csv file format. Can be used as template for your specific converter. The created csv file is ready to import in recipes.py. Import CSV may not have spaces before or after the column values.
+
+### reciper
+
+
+#### Camera Compatibility
+
+Tested for cameras X-T50 and X-S10. But every Fujifilm cameras with a X-sensor of generation V and IV should be working, too. But older camera models can have different setting/tag ranges and some settings/tags may not exists at all. For instance, the X-T30 doesn't have the exif tag `MakerNotes:BWMagentaGreen`. And the tag `MakerNotes:BlackImageTone` has a smaller range from -9..9 the X-T50 (-18..18).
+
+#### Matching Qualitiy 
+
+Comparing EXIF data of an specific image with settings of an recipe is not easy and not clear-cut.
+
+The finding logic for the best matching recipe is based only on comparing values. To find the best matching recipe attributes are **weighted**. For instance the film simulation is more relevant than the sharpness value. The weighting is a subjective assessment. Future adjustments cannot be ruled out. 
+
+The value **deviation** is a percentage value of the setting range. The setting range may vary for different models. For instance _BW Tone_ on X-T30 has a range from -9 to +9 (B & W Adjustment), on X-T50 the range is from -18 to +18 (Monochromatic Color warm/cool). 
+
+The **recipes** can vary in precision. Not all setting values are always specified. They may or may not relate to a specific sensor generation.
+
 ```text
 usage: reciper.py [-h] [-v] [-vv] [-r RECIPES] [-t THRESHOLD] [-p] [-d] [-k] FILE [FILE ...]
 
@@ -36,9 +59,7 @@ options:
   -k, --keywords        Update image keywords with recipe and filmsimulation
 ```
 
-#### customs
-
-Recipes to custom settings for Fujifilm X Ras Studio. 
+### customs
 
 ```text
 usage: customs.py [-h] [-i INPUT] [-t TEMPLATE] [-o OUTDIR] [-v] [-vv]
@@ -55,14 +76,9 @@ options:
   -vv, --vverbose       Increase output very verbosity.
   ```
 
-#### converter
-
-Simple tool to convert recipes file from a properitary csv to the reciper's csv file format. Can be used as template for other converter.
-The created csv file is ready to import in recipes.py
-Import CSV may not have spaces before or after the column values.
+### converter
 
 ```text
-(venv) ➜  recipetagger git:(main) ✗ python converter.py -h
 usage: converter.py [-h] [-i INPUT] [-o OUTPUT]
 
 options:
@@ -73,25 +89,10 @@ options:
                         Output CSV file (Default: recipes.csv).
 ```
 
-### Camera Compatibility
-
-Tested for cameras X-T50 and X-S10. But every Fujifilm cameras with a X-sensor of generation V and IV should be working, too. But older camera models can have different setting/tag ranges and some settings/tags may not exists at all. For instance, the X-T30 doesn't have the exif tag `MakerNotes:BWMagentaGreen`. And the tag `MakerNotes:BlackImageTone` has a smaller range from -9..9 the X-T50 (-18..18).
-
-### Matching Qualitiy 
-
-Comparing EXIF data of an specific image with settings of an recipe is not easy and not clear-cut.
-
-The finding logic for the best matching recipe is based only on comparing values. To find the best matching recipe attributes are **weighted**. For instance the film simulation is more relevant than the sharpness value. The weighting is a subjective assessment. Future adjustments cannot be ruled out. 
-
-The value **deviation** is a percentage value of the setting range. The setting range may vary for different models. For instance _BW Tone_ on X-T30 has a range from -9 to +9 (B & W Adjustment), on X-T50 the range is from -18 to +18 (Monochromatic Color warm/cool). 
-
-The **recipes** can vary in precision. Not all setting values are always specified. They may or may not relate to a specific sensor generation.
-
 
 ## Installation
 
 exiftool must be installed on your system.
-
 
 ### Examples
 

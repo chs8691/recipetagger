@@ -3,6 +3,7 @@ from customs import read_template
 from customs import create_custom
 from customs import search_tag
 from customs import search_propertyGroup
+from customs import sanatize_name
 from constants import recipefields as R
 from constants import dynamicrange as DR
 from constants import recipefields as R
@@ -658,3 +659,9 @@ def test_min_with_decimals_template(cam):
     (exp_value, act_value, act_count) = get(C.CLARITY, exp_lines, act_lines)
     assert act_count == 1 and act_value == exp_value
 
+
+def test_sanatize_name():
+   
+   assert sanatize_name('H4g0') == 'H4g0'
+   assert sanatize_name('Hugo Ross') == 'Hugo Ross'
+   assert sanatize_name('A/\|?.><,:;`˜!@#$%^&*()[]{}B') == 'AB'

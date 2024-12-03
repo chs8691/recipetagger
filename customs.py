@@ -71,7 +71,7 @@ def search_tag(tag, lines):
             cnt += 1
 
     if count == 0:
-        log(f'tag {tag} not found')
+        log(f'tag {tag} not found!!')
     
     return (count, line_number, value)
     
@@ -97,10 +97,11 @@ def search_propertyGroup(tag, lines):
             value = m.group(1)
             line_number = cnt
             count += 1
+            found = True
         cnt += 1            
       
     if not found:
-        log(f'tag {tag} not found')
+        log(f'tag {tag} not found!')
     
     return (count, line_number, value)
 
@@ -306,8 +307,13 @@ def read_template(template):
 
 
 def write_custom(custom, outdir, name):
+    """Write to FP1 files that is named excatly the recipe name.
+    name: Recipe name. Must be a valid file name for the underlying OS.
+    """
 
-    filenname = f'{name.replace(' ', '_').replace("’", '')}.FP1'
+    # Different name doesn't work for X Raw Studio
+    # filenname = f'{name.replace(' ', '_').replace("’", '')}.FP1'
+    filenname = f'{name}.FP1'
 
     with(open(path.join(outdir,filenname), mode="w")) as f:
         f.writelines(custom)   
@@ -418,6 +424,40 @@ def map_filmsimulation(recipe_value):
     return 'Provia'
 
 
+# def sanatize_names(recipes):
+#     """Sanatize recipe name, because it has to be used as file name.
+#     Otherwise the ricepe can't be used in the X RAW Studio without trouble.
+#     All characater which can't be used in Windows, MacOS or Linux will be 
+#     replaced or removed.
+#     """
+
+#     ret = []
+
+#     for r in recipes:
+#         name = r[R.NAME]
+#         r[R.NAME] = name.replace(' ', '').replace("’", '')
+#         if name != r[R.NAME]:
+#             log(f"Sanatize Name: {name} --> {r[R.NAME]}" )
+#         ret.append(r)
+
+    return ret
+def sanatize_name(name):
+    """Sanatize recipe name, because it has to be used as file name.
+    Otherwise the ricepe can't be used in the X RAW Studio without trouble.
+    All characater which can't be used in Windows, MacOS or Linux will be 
+    replaced or removed.
+    """
+
+    ret = ''
+
+    for c in name:
+        if c in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmenopqrstuvwxyz0123456789 -_":
+            ret = ret + c
+
+    if name != ret:
+        log(f"Sanatize Name: {name} --> {ret}" )
+
+    return ret
 
 def main():
 
@@ -441,7 +481,11 @@ def main():
 
     print(f'Camera: {camera}')
 
-    recipes = import_recipes(input)
+    recipes = []
+    for r in import_recipes(input):
+        r[R.NAME] = sanatize_name(r[R.NAME])
+        recipes.append(r)
+    # recipes = sanatize_names(import_recipes(input))
 
     cnt = 0
     ok = 0
