@@ -92,11 +92,11 @@ options:
 
 ## Installation
 
-exiftool must be installed on your system.
+Exiftool and Python 3 must be installed on your system. 
 
 ### Examples
 
-#### reciper
+#### reciper.py
 
 For the ricipes, the given file 'recipes.csv' is used (default name).
 
@@ -158,15 +158,15 @@ Divergent settings:
 - Highlights: 0 (1.5)
 ```
 
-> [!NOTE]
+> [!NOTE]  
 > An existing description will not be overwritten. But all after `--- Recipe info ---` will be replaced.
 
-Using wildcard...:
+Selecting multiple image files by using wildcards:
 ```console
 $ python reciper.py -d import/*.jpg
 ```
 
-...or multiple files:
+Selecting multiple files is possible, too:
 ```console
 python reciper.py -d import/1188.jpg import/1139.jpg
 ```
@@ -180,8 +180,14 @@ Found 2 file(s).
 
 Processed all 2 image(s) successfully.
 ```
+If you have changed an image file with Fujifilm X RAW Studio you can just update the last modified file. For instance:
 
-No matching result updates the description, too:
+```console
+ls -t ~/Pictures/*.jpg | head -n1 | xargs python reciper.py  -d -k
+```
+
+
+Matching no recipe will also update the description:
 ```console
 $ python reciper.py -t=100 -d 1188-X-T50.jpg 
 44/44 recipes imported.
@@ -211,11 +217,15 @@ Clarity: -3.0
 ISO: 640%    
 ```
 
-#### customs
+#### customs.py
 
 Example on MacOS for camera X-T50.
 
-Create FP1 files for X-T50 camera. For this, an FP1 file has been exported from Fujifilm X Raw Studio.
+The script reates FP1 files for X-T50 camera. For this, an existing FP1 file from Fujifilm X Raw Studio has to be used as template. For instance you have saved a custom settings with the name _my-custom-settings_:
+
+```console
+cp ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100/my-custom-settings.FP1 template.FP1
+```
 
 Check template file for the correct camera name:
 ```console

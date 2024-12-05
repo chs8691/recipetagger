@@ -945,9 +945,9 @@ def get_image_files(pathto):
         files = pathto
 
     if len(files) == 0:
-        exit(f'No files found at: {pathto}')
+        exit(f'No image file found at: {pathto}')
     else:
-        print(f'Found {len(files)} file(s).')
+        print(f'Found {len(files)} image file(s).')
 
     for f in files:
         if not (f.upper().endswith('JPG') or f.upper().endswith('JPG_ORIGINAL')):
@@ -969,7 +969,7 @@ def process():
 
     for f in files:
         total += 1
-        log(f'Processing {f}')
+        print(f'Processing {f}')
         exif=read_file(f)
 
         res = find_recipe(exif, recipes)
