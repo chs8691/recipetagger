@@ -235,9 +235,8 @@ $ head -n 3 template.FP1
     <PropertyGroup device="X-T50" version="X-T50_0100" label="Kodachrome 64">
 ```
 
-Create FP1 files into new directory `customs`:
+Create FP1 files into directory `customs` (must exists):
 ```console
-$ mkdir customs
 $ python customs.py -i recipes.csv -t template.FP1 -o customs/
 ```
 
@@ -248,7 +247,7 @@ $ mv ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T5
 
 Activate new settings:
 ```console
-$ mv customs/ ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100/
+$ mv customs/* ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100/
 ```
 
 After re-opening the Fujifilm X-Raw Studio, the custom seettings for X-T50 are ready to use.

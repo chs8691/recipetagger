@@ -723,7 +723,7 @@ def gather(exif):
         ret.append((field2, exif[field2]))
 
     field = R.DYNAMIC_RANGE
-    if(exif[field] != DR.OFF):
+    if(field in exif and exif[field] != DR.OFF):
         ret.append((field, exif[field]))
 
         field = R.SHADOWS

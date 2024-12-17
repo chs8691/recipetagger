@@ -67,7 +67,7 @@ def main():
 
     all = []
 
-    with open(args.input, newline='') as rfile:
+    with open(args.input[0], newline='') as rfile:
         with open('recipes.csv', 'w', newline='') as wfile:
             spamreader = csv.DictReader(rfile, delimiter=',', quotechar='"')
             spamwriter = csv.writer(wfile, delimiter=',',

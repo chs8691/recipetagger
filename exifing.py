@@ -64,27 +64,46 @@ def map_wb_finetune(values):
 def map_tone(value):
     """Returns values as signed integer. 
     In exif, the value is a signed integer, too.
+    Hint: The .5 values are not listed in https://exiftool.org/TagNames/FujiFilm.html
 
     -64 = +4 (hardest)
+    -56 = +3.5 
     -48 = +3 (very hard)
+    -40 = +2.5 
     -32 = +2 (hard)
+    -24 = +1.5 	  	
     -16 = +1 (medium hard)	  	
+    -8  = +0.5 	  	
     0   =  0 (normal)
+    8   =  -0.5
     16  = -1 (medium soft)
+    24  = -1.5 
     32  = -2 (soft)
     """
 
     match value:
         case -64:
             return 4
+        case -56:
+            return 3.5
         case -48:
             return 3
+        case -40:
+            return 2.5
         case -32:
             return 2
+        case -24:
+            return 1.5
         case -16:
             return 1
+        case -8:
+            return 0.5
+        case 8:
+            return -0.5
         case 16:
             return -1
+        case 24:
+            return -1.5
         case 32:
             return -2
     
@@ -154,7 +173,7 @@ def map_dynamic_range(value):
         0x0 = Auto
         0x1 = Manual                <<< Not supperted
         0x100 = Standard (100%)
-        0x200 = Wide1 (230%)
+        0x200 = Wide1 (200%)
         0x201 = Wide2 (400%)
         0x8000 = Film Simulation    <<< Not supperted
     """
