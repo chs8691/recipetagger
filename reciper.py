@@ -436,6 +436,7 @@ def check_recipe(exif, recipe):
 
 
     bws=[FS.ACROS, FS.MONOCHROME]
+    nocol=[FS.ACROS, FS.MONOCHROME, FS.SEPIA]
     if exif[R.FILMSIMULATION] in bws and recipe[R.FILMSIMULATION] in bws:
 
         field = R.BW_COLOR_WC
@@ -454,7 +455,7 @@ def check_recipe(exif, recipe):
         if act < MAX:
             failed.append((act, field, exif[field], recipe[field]))
 
-    elif exif[R.FILMSIMULATION] not in bws and recipe[R.FILMSIMULATION] not in bws:
+    elif (exif[R.FILMSIMULATION] not in nocol and recipe[R.FILMSIMULATION] not in nocol):
         # print(f'CHECKER exif:{exif[R.FILMSIMULATION]}, recipe:{recipe[R.FILMSIMULATION]}')
         field = R.COLOR
         weight = 1
