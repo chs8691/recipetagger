@@ -14,8 +14,7 @@ import logging
 LOGGER = logging.getLogger(__name__)
 
         
-def test_map_drange_priority():
-    assert ex.map_drange_priority(None) == None
+y
     assert ex.map_drange_priority(1) == DP.WEAK
     assert ex.map_drange_priority(2) == DP.STRONG
     assert ex.map_drange_priority(3) == None

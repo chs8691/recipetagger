@@ -221,7 +221,7 @@ ISO: 640%
 
 Example on MacOS for camera X-T50.
 
-The script reates FP1 files for X-T50 camera. For this, an existing FP1 file from Fujifilm X Raw Studio has to be used as template. For instance you have saved a custom settings with the name _my-custom-settings_:
+The script creates FP1 files for X-T50 camera. For this, an existing FP1 file from Fujifilm X Raw Studio has to be used as template. For instance you have saved a custom settings with the name _my-custom-settings_:
 
 ```console
 cp ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100/my-custom-settings.FP1 template.FP1
@@ -242,7 +242,8 @@ $ python customs.py -i recipes.csv -t template.FP1 -o customs/
 
 Backup existing Fujifilm X Raw Studio settings (the name of the subdirectory may vary):
 ```console
-$ mv ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100 ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100_bak
+$ mkdir ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100_bak 
+$ mv ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100/* ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100_bak/
 ```
 
 Activate new settings:
@@ -250,4 +251,34 @@ Activate new settings:
 $ mv customs/* ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100/
 ```
 
-After re-opening the Fujifilm X-Raw Studio, the custom seettings for X-T50 are ready to use.
+After re-opening the Fujifilm X-Raw Studio, the custom seettings for X-T50 are ready to use. 
+
+HINT: In X Raw Studio _DR Priority_ = `Auto` can not be set to an image. So it is not possible to store this recipe value as custom setting to your camera with X Raw Studio. Instead, the value must be set in the camera directly.
+
+# Cheat Sheet
+
+Update Reices from device export. 
+
+Prepare:
+
+```zsh
+    cd /Users/chris/dev/recipetagger  
+    source venv/bin/activate
+```
+  
+Renew it altogether now:
+
+```zsh
+cp ~/Library/CloudStorage/SynologyDrive-externalChrisPictures/tmp/X-Recipes.csv import/ && \
+python converter.py -i import/X-Recipes.csv -o recipes.csv && \
+rm -f customs/* && \
+python customs.py -i recipes.csv -t template.FP1 -o customs/ && \
+rm ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100_bak/* && \
+mv customs/* ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100/
+```   
+
+Check result:
+
+```zsh
+ls -l ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100/
+```

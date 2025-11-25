@@ -3,7 +3,7 @@ from constants import whitebalance as WB
 from constants import drangepriority as DP
 from constants import dynamicrange as DR
 
-def map_dynamicrange(recipe_value):
+def DEPRECATED_map_dynamicrange(recipe_value):
     """Returns custom settings value for the give recipe value"""
 
     match recipe_value:
@@ -17,7 +17,7 @@ def map_dynamicrange(recipe_value):
     return '0'
 
 
-def map_drpriority(recipe_value):
+def DEPRECATED_map_drpriority(recipe_value):
     """Returns custom settings value for the give recipe value"""
 
     match recipe_value:
@@ -29,7 +29,7 @@ def map_drpriority(recipe_value):
     return '0'
 
 
-def map_whitebalance(recipe_value):
+def DEPRECATED_map_whitebalance(recipe_value):
     """Returns custom settings value for the give recipe value"""
 
     match recipe_value:
@@ -60,8 +60,12 @@ def map_whitebalance(recipe_value):
 
 
 
-def map_filmsimulation(recipe_value):
+def DEPRECATED_map_filmsimulation(recipe_value):
     """Returns custom settings value for the give recipe value"""
+
+
+    print('cumstom.map_filmsimulation scheint doch noch in Verwendung. Doppelte Definition zu customs.')
+    exit(1)
 
     match recipe_value:
         # case FS.PROVIA:

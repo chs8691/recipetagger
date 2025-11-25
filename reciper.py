@@ -15,7 +15,7 @@ from glob import glob
 import subprocess
 
 # exiftool must be installed on the system
-from exiftool import ExifToolHelper
+from exiftool import ExifToolHelper, exceptions
 
 args=None
 
@@ -129,110 +129,120 @@ def read_file(filename):
     exif[R.NAME] = filename
 
     with ExifToolHelper() as et:
-        for d in et.get_metadata(filename):
+        try:
+            for d in et.get_metadata(filename):
 
-            for k, v in d.items():
-                vvlog(f"Dict: {k} = {v}")   
-        
-            field='MakerNotes:FilmMode'
-            # Color film; not existing for monochromatic films
-            if(field in d):   
-        
-                value=d[field]
-                vvlog(f'{field}={value}')
-        
-                exif[R.FILMSIMULATION] = ex.map_filmsimulation(d[field])
-
-                field='MakerNotes:Saturation'         
-                exif[R.COLOR]=ex.map_saturation(d[field])
+                for k, v in d.items():
+                    vvlog(f"Dict: {k} = {v}")   
             
-            # Monochromatic film (ACROS, MONOCHROME, SEPIA)
-            else:
+                field='MakerNotes:FilmMode'
+                # Color film; not existing for monochromatic films
+                if(field in d):   
+            
+                    value=d[field]
+                    vvlog(f'{field}={value}')
+            
+                    exif[R.FILMSIMULATION] = ex.map_filmsimulation(d[field])
 
-                field='MakerNotes:Saturation'         # Color value or ACROS etc.  
-                value = None 
-                (exif[R.FILMSIMULATION], value)=ex.map_saturation(d[field])
+                    field='MakerNotes:Saturation'         
+                    exif[R.COLOR]=ex.map_saturation(d[field])
                 
-                if value is not None:
-                    exif[R.BW_FILTER] = value
-
-                if exif[R.FILMSIMULATION] != FS.SEPIA:
-                    # Older cams just have BWAdjustment (T-30 ?)
-                    field='MakerNotes:BWAdjustment'    # Monochromatic Color warm/cool
-                    exif[R.BW_COLOR_WC] = d[field]
-                    # Newer cams also have BWMagentaGreen
-                    field='MakerNotes:BWMagentaGreen'  # Monochromatic Color magenta/green
-                    exif[R.BW_COLOR_MC] = d[field]
-            
-            field='MakerNotes:Sharpness'
-            exif[R.SHARPNESS] = ex.map_sharpness(d[field])
-            
-            exif[R.GRAIN_EFFECT] = ex.map_grain(
-                d['MakerNotes:GrainEffectRoughness'],
-                d['MakerNotes:GrainEffectSize']
-            )
-
-            field='MakerNotes:ColorChromeEffect'             
-            exif[R.CCR_EFFECT] = ex.map_color_chrome(d[field])
-
-            field='MakerNotes:ColorChromeFXBlue'             
-            exif[R.CCRFX_BLUE] = ex.map_color_chrome(d[field])
-
-            field='MakerNotes:WhiteBalance'          
-            exif[R.WHITE_BALANCE] = ex.map_whitebalance(d[field])
-
-            field='MakerNotes:ColorTemperature'      
-            if(exif[R.WHITE_BALANCE] == WB.KELVIN):           
-                exif[R.KELVIN] = d[field]
-    
-            field='MakerNotes:WhiteBalanceFineTune'
-            if field in d:
-                (value, value2) = ex.map_wb_finetune(d[field])
-                exif[R.WHITE_BALANCE_R] = value
-                exif[R.WHITE_BALANCE_B] = value2
-            else:
-                log(f'WARN Field {field} not found. This is normal if the image is shot in automatic mode.')
-
-            field='MakerNotes:DRangePriority' # Auto (0) or Fixed (1)
-
-            # DRange Proirity
-            if field in d:
-                field='MakerNotes:DRangePriorityAuto' 
-                field2='MakerNotes:DRangePriorityFixed' 
-                if field in d:
-                    exif[R.DRANGE_PRIORITY]=ex.map_drange_priority(d[field])
-                elif field2 in d:
-                    exif[R.DRANGE_PRIORITY]=ex.map_drange_priority(d[field2])
-    
-            # No DRange Priority
-            else:
-                field='MakerNotes:DynamicRangeSetting'
-                if  d[field] == 0: # Auto
-                    field2='MakerNotes:AutoDynamicRange'
-                    exif[R.DYNAMIC_RANGE] = ex.map_dynamic_range(d[field2])
-                elif d[field] == 1: # Manuel
-                    field2='MakerNotes:DevelopmentDynamicRange'
-                    exif[R.DYNAMIC_RANGE] = ex.map_dynamic_range(d[field2])
+                # Monochromatic film (ACROS, MONOCHROME, SEPIA)
                 else:
-                    print(f'ERROR Unknown value for {field}: {d[field]}')
-                    return None
+
+                    field='MakerNotes:Saturation'         # Color value or ACROS etc.  
+
+                    if not field in d:
+                        print(f'ERROR Field {field} not found. Skipping processing.')
+                        return None
+
+                    value = None 
+                    (exif[R.FILMSIMULATION], value)=ex.map_saturation(d[field])
+                    
+                    if value is not None:
+                        exif[R.BW_FILTER] = value
+
+                    if exif[R.FILMSIMULATION] != FS.SEPIA:
+                        # Older cams just have BWAdjustment (T-30 ?)
+                        field='MakerNotes:BWAdjustment'    # Monochromatic Color warm/cool
+                        exif[R.BW_COLOR_WC] = d[field]
+                        # Newer cams also have BWMagentaGreen
+                        field='MakerNotes:BWMagentaGreen'  # Monochromatic Color magenta/green
+                        exif[R.BW_COLOR_MC] = d[field]
                 
-                field='MakerNotes:HighlightTone'
-                exif[R.HIGHLIGHTS] = ex.map_tone(d[field])
-                field='MakerNotes:ShadowTone'
-                exif[R.SHADOWS] = ex.map_tone(d[field])
-              
-            field='MakerNotes:NoiseReduction'            
-            exif[R.HIGH_ISONR]=ex.map_noisereduction(d[field])
+                field='MakerNotes:Sharpness'
+                exif[R.SHARPNESS] = ex.map_sharpness(d[field])
+                
+                exif[R.GRAIN_EFFECT] = ex.map_grain(
+                    d['MakerNotes:GrainEffectRoughness'],
+                    d['MakerNotes:GrainEffectSize']
+                )
 
-            field='MakerNotes:Clarity'
-            exif[R.CLARITY]=ex.map_clarity(d[field])
+                field='MakerNotes:ColorChromeEffect'             
+                exif[R.CCR_EFFECT] = ex.map_color_chrome(d[field])
 
-            field='EXIF:ISO'
-            exif[R.ISO]=d[field]
+                field='MakerNotes:ColorChromeFXBlue'             
+                exif[R.CCRFX_BLUE] = ex.map_color_chrome(d[field])
 
-            field='EXIF:Model'
-            exif[R.XTRANS_VERSION]=ex.get_sensor(d[field])
+                field='MakerNotes:WhiteBalance'          
+                exif[R.WHITE_BALANCE] = ex.map_whitebalance(d[field])
+
+                field='MakerNotes:ColorTemperature'      
+                if(exif[R.WHITE_BALANCE] == WB.KELVIN):           
+                    exif[R.KELVIN] = d[field]
+        
+                field='MakerNotes:WhiteBalanceFineTune'
+                if field in d:
+                    (value, value2) = ex.map_wb_finetune(d[field])
+                    exif[R.WHITE_BALANCE_R] = value
+                    exif[R.WHITE_BALANCE_B] = value2
+                else:
+                    log(f'WARN Field {field} not found. This is normal if the image is shot in automatic mode.')
+
+                field='MakerNotes:DRangePriority' # Auto (0) or Fixed (1)
+
+                # DRange Proirity
+                if field in d:
+                    field='MakerNotes:DRangePriorityAuto' 
+                    field2='MakerNotes:DRangePriorityFixed' 
+                    if field in d:
+                        exif[R.DRANGE_PRIORITY]=ex.map_drange_priority(d[field])
+                    elif field2 in d:
+                        exif[R.DRANGE_PRIORITY]=ex.map_drange_priority(d[field2])
+        
+                # No DRange Priority
+                else:
+                    field='MakerNotes:DynamicRangeSetting'
+                    if  d[field] == 0: # Auto
+                        field2='MakerNotes:AutoDynamicRange'
+                        exif[R.DYNAMIC_RANGE] = ex.map_dynamic_range(d[field2])
+                    elif d[field] == 1: # Manuel
+                        field2='MakerNotes:DevelopmentDynamicRange'
+                        exif[R.DYNAMIC_RANGE] = ex.map_dynamic_range(d[field2])
+                    else:
+                        print(f'ERROR Unknown value for {field}: {d[field]}')
+                        return None
+                    
+                    field='MakerNotes:HighlightTone'
+                    exif[R.HIGHLIGHTS] = ex.map_tone(d[field])
+                    field='MakerNotes:ShadowTone'
+                    exif[R.SHADOWS] = ex.map_tone(d[field])
+                
+                field='MakerNotes:NoiseReduction'            
+                exif[R.HIGH_ISONR]=ex.map_noisereduction(d[field])
+
+                field='MakerNotes:Clarity'
+                exif[R.CLARITY]=ex.map_clarity(d[field])
+
+                field='EXIF:ISO'
+                exif[R.ISO]=d[field]
+
+                field='EXIF:Model'
+                exif[R.XTRANS_VERSION]=ex.get_sensor(d[field])
+
+        except exceptions.ExifToolExecuteError:
+            print(f'ERROR ExifToolExecuteError. Skipping processing.')
+            return None
 
         log(exif)
     return exif
@@ -243,13 +253,14 @@ def find_recipe(exif, recipes):
 
     results = []
     for r in recipes:
-        res = check_recipe(exif, r)
+        res =  check_recipe(exif, r)
         if res is not None:
             results.append(res)
-        else:
-            log('ERROR check_recipe() returned \'None\'.')
-            return None
+        # else:
+        #     log('ERROR check_recipe() returned \'None\'.')
+        #     return None
 
+    log(f'results={results}')
     results.sort(key=lambda a: a[0], reverse=True)
     
     log(f'Imported {len(results)} recipes.')
@@ -274,6 +285,8 @@ def check_recipe(exif, recipe):
         Example: ( 90, 'Recipe No. 1', [(10, R.COLOR, 2, -2)] )
         Every single score will be weightend between 0..10. For instance FILMSIMULATION
         is very important: weight=10
+        Returns None, if comparing not possible, for instance when DR Auto is used.
+        If Returns None, a Message will be printed.
     """
     failed = []
     total = 0
@@ -394,6 +407,10 @@ def check_recipe(exif, recipe):
         if act < MAX:
             failed.append((act, field, exif[field], recipe[field]))
 
+    if R.WHITE_BALANCE_B not in exif or R.WHITE_BALANCE_B not in exif:
+        print("WARN WB Fine Tune not in EXIF data. Maybe DR Auto is used. Skipped for matching recipes.")
+        return None
+    
     field = R.WHITE_BALANCE_R
     weight = 3
     act = rate_range(-9, +9, exif[field], recipe[field])
@@ -950,12 +967,16 @@ def get_image_files(pathto):
     else:
         print(f'Found {len(files)} image file(s).')
 
+    ret = []
     for f in files:
         if not (f.upper().endswith('JPG') or f.upper().endswith('JPG_ORIGINAL')):
-            print(f'WARN File with no jpg suffix: {f}')
+            print(f'WARN Skipping file with no jpg suffix: {f}')
+        else:
+            ret.append(f)
 
-    log(f'Files: {files}')
-    return files
+
+    log(f'Files: {ret}')
+    return ret
 
 def process():
     
@@ -976,7 +997,7 @@ def process():
         res = find_recipe(exif, recipes)
         if res == None:
             err += 1
-            print(f'\nERROR Skipping image, maybe of insufficient exif data: {path.basename(f)}')
+            log(f'\nWARN Skipping image, maybe of insufficient exif data: {path.basename(f)}')
             continue
 
         if args.print:
