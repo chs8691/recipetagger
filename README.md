@@ -183,7 +183,7 @@ Processed all 2 image(s) successfully.
 If you have changed an image file with Fujifilm X RAW Studio you can just update the last modified file. For instance:
 
 ```console
-ls -t ~/Pictures/*.jpg | head -n1 | xargs python reciper.py  -d -k
+find ~/Pictures -iname "*.j*"  | head -n1 | xargs python reciper.py -d -k 
 ```
 
 
@@ -257,7 +257,26 @@ HINT: In X Raw Studio _DR Priority_ = `Auto` can not be set to an image. So it i
 
 # Cheat Sheet
 
-Update Reices from device export. 
+## Tag description and tags for the 10 newest "jpg"-images and check for 95% matching treshold
+
+```zsh
+find ~/pictures -type f -iname "*.jpg" -print0 | xargs -0 ls -t | head -n10 | xargs python reciper.py -t 95 -d -k 
+```
+
+## Tag description and tags jpeg-images with all possible suffixes (jpg, JPG, jpeg, JPEG)
+
+```zsh
+find ~/pictures -type f -iname "*.jpg" -or -iname "*.jpeg"  -print0 | xargs -0 ls -t  | xargs python reciper.py  -d -k 
+```
+
+## All toghter
+
+```zsh
+find ~/pictures -type f -iname "*.jpg" -or -iname "*.jpeg" -print0 | xargs -0 ls -t | head -n10 | xargs python reciper.py -t 95 -d -k 
+```
+
+
+## Update recipes from device export. 
 
 Prepare:
 

@@ -338,13 +338,13 @@ def test_check_recpipe_failed_fields_color_drp_mode():
     assert R.WHITE_BALANCE in fields
     assert R.WHITE_BALANCE_R in fields
     assert R.WHITE_BALANCE_B in fields
-    assert R.GRAIN_EFFECT in fields
-    assert R.CCR_EFFECT in fields
-    assert R.CCRFX_BLUE in fields
+    assert R.GRAIN_EFFECT not in fields
+    assert R.CCR_EFFECT not in fields
+    assert R.CCRFX_BLUE not in fields
     assert R.COLOR in fields
     assert R.SHARPNESS in fields
     assert R.HIGH_ISONR in fields
-    assert R.CLARITY in fields
+    assert R.CLARITY not in fields
     assert R.ISO_MIN not in fields
     assert R.ISO_MAX in fields
     assert R.XTRANS_VERSION in fields
@@ -404,13 +404,13 @@ def test_check_recpipe_failed_fields_color_dr_mode():
     assert R.WHITE_BALANCE_B in fields
     assert R.HIGHLIGHTS in fields
     assert R.SHADOWS in fields
-    assert R.GRAIN_EFFECT in fields
-    assert R.CCR_EFFECT in fields
-    assert R.CCRFX_BLUE in fields
+    assert R.GRAIN_EFFECT not in fields
+    assert R.CCR_EFFECT not in fields
+    assert R.CCRFX_BLUE not in fields
     assert R.COLOR in fields
     assert R.SHARPNESS in fields
     assert R.HIGH_ISONR in fields
-    assert R.CLARITY in fields
+    assert R.CLARITY not in fields
     assert R.ISO_MIN in fields
     assert R.ISO_MAX not in fields
     assert R.XTRANS_VERSION in fields

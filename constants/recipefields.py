@@ -28,3 +28,9 @@ ISO_MAX   = 'ISO max'                     # Unsigned Integer: 0 .. 51200 (recipe
 ISO       = 'ISO'                         # Unsigned Integer: 0 .. 51200 (image only)
 XTRANS_VERSION   = 'X-Trans Version'      # String: 5, 4, 3, ...
 
+# Additonal fields
+MODEL = 'MODEL'
+MAKE = 'MAKE'
+SOFTWARE = 'SOFTWARE'
+SOOC = 'SOOC'
+
