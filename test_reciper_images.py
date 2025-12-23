@@ -21,7 +21,27 @@ LOGGER = logging.getLogger(__name__)
 # See README file in testdata for more information.
 X_T50 = 'X-T50'
 X_S10 = 'X-S10'
-cameras = [X_T50, X_S10]
+X_E2S = 'X-E2S'
+cameras = [X_T50, X_S10, X_E2S]
+# cameras = [X_E2S]
+
+@pytest.mark.parametrize("cam", cameras)
+def test_images_sooc_in_automode(cam):
+
+    name = f'testdata/{cam}/{cam}-Automodus.JPG'
+
+    if not path.exists(name):
+        LOGGER.warning(f'Missing test image: {name}')
+        return
+    
+    act = reciper.read_file(name)
+
+    # Not shure if this always match, but it works for my cams 
+    if act[R.XTRANS_VERSION] == SR.X_II or act[R.XTRANS_VERSION] == SR.X_I:
+        assert act[R.SOOC] == False , name
+    else:
+        assert act[R.SOOC] == True , name
+
 
 @pytest.mark.parametrize("cam", cameras)
 def test_images_sensor(cam):
@@ -38,6 +58,8 @@ def test_images_sensor(cam):
             assert act[R.XTRANS_VERSION] == SR.X_V, name
         case 'X-S10':
             assert act[R.XTRANS_VERSION] == SR.X_IV, name
+        case 'X-E2S':
+            assert act[R.XTRANS_VERSION] == SR.X_II, name
 
 
 @pytest.mark.parametrize("cam", cameras)
@@ -290,7 +312,7 @@ def test_images_drp_strong(cam):
 @pytest.mark.parametrize("cam", cameras)
 def test_images_drp_auto(cam):
 
-    name = f'testdata/{cam}/{cam}-DRP-Strong.JPG'
+    name = f'testdata/{cam}/{cam}-DRP-Auto-weak.JPG'
 
     if not path.exists(name):
         LOGGER.warning(f'Missing test image: {name}')
@@ -298,7 +320,7 @@ def test_images_drp_auto(cam):
     
     act = reciper.read_file(name)
 
-    assert act[R.DRANGE_PRIORITY] == DP.STRONG , name
+    assert act[R.DRANGE_PRIORITY] == DP.WEAK , name
 
 
 @pytest.mark.parametrize("cam", cameras)

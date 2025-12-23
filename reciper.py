@@ -120,7 +120,8 @@ def import_recipes(filename):
 
 def read_file(filename):
     """Works for Fujifilm X-T50, X-S10 and partially X-E2s
-    Returns dictionary with all recipe fields.
+    Returns dictionary with all recipe fields. Key R.SOOC is always set. This is the switch for all
+    recipe relevant processing within this script.
     Returns None in error case. This can happens, if the image is post processed with a softwore, e.g. Luminance HDR etc.
     """
     log(f'Readin Image file {filename}')
@@ -135,6 +136,7 @@ def read_file(filename):
                 for k, v in d.items():
                     vvlog(f"Dict: {k} = {v}")   
 
+
                 field='EXIF:Model'
                 exif[R.MODEL]=d[field]
                 exif[R.XTRANS_VERSION]=ex.get_sensor(d[field])
@@ -147,17 +149,28 @@ def read_file(filename):
 
                 field='EXIF:ISO'
                 exif[R.ISO]=d[field]
+             
 
+                # Beeing pessimistic
+                exif[R.SOOC] = False
                 # SOOC
+                # Try to support SOOC also for auto mode.
+                # Tricky to decide. In auto mode newer cams have more attrubtes than older ones. 
                 if exif[R.MAKE].lower() == 'fujifilm' and \
                     exif[R.MODEL].lower().startswith('x') and \
                     exif[R.SOFTWARE].lower().startswith(f'digital camera {exif[R.MODEL].lower()}'):
-                    exif[R.SOOC] = True
+                        
+                    field='MakerNotes:Saturation'
+                    if field in d:
+                        exif[R.SOOC] = True
+                        log(f'Has Saturation. Set SOOC')
 
-                if R.SOOC in exif:         
+
+                # Only set filmmode, if not post processed!
+                if exif[R.SOOC] == True:         
                     field='MakerNotes:FilmMode'
                     # Color film; not existing for monochromatic films
-                    if(field in d):   
+                    if field in d:   
                 
                         value=d[field]
                         vvlog(f'{field}={value}')
@@ -233,6 +246,7 @@ def read_file(filename):
                     field='MakerNotes:DRangePriority' # Auto (0) or Fixed (1)
 
                     # DRange Proirity
+                    # Depends of mode (Auto or normal/fixed) where to find the value
                     if field in d:
                         field='MakerNotes:DRangePriorityAuto' 
                         field2='MakerNotes:DRangePriorityFixed' 
@@ -244,15 +258,20 @@ def read_file(filename):
                     # No DRange Priority
                     else:
                         field='MakerNotes:DynamicRangeSetting'
-                        if  d[field] == 0: # Auto
-                            field2='MakerNotes:AutoDynamicRange'
-                            exif[R.DYNAMIC_RANGE] = ex.map_dynamic_range(d[field2])
-                        elif d[field] == 1: # Manuel
-                            field2='MakerNotes:DevelopmentDynamicRange'
-                            exif[R.DYNAMIC_RANGE] = ex.map_dynamic_range(d[field2])
+
+                        # AutoMode X-E2S: Emergency Exit
+                        if field not in d:
+                            exif[R.SOOC] = False
                         else:
-                            print(f'WARN Unknown value for {field}: {d[field]}')
-                            # return None
+                            if  d[field] == 0: # Auto
+                                field2='MakerNotes:AutoDynamicRange'
+                                exif[R.DYNAMIC_RANGE] = ex.map_dynamic_range(d[field2])
+                            elif d[field] == 1: # Manuel
+                                field2='MakerNotes:DevelopmentDynamicRange'
+                                exif[R.DYNAMIC_RANGE] = ex.map_dynamic_range(d[field2])
+                            else:
+                                print(f'WARN Unknown value for {field}: {d[field]}')
+                                # return None
                         
                         field='MakerNotes:HighlightTone'
                         exif[R.HIGHLIGHTS] = ex.map_tone(d[field])
@@ -261,6 +280,10 @@ def read_file(filename):
                     
                     field='MakerNotes:NoiseReduction'            
                     exif[R.HIGH_ISONR]=ex.map_noisereduction(d[field])
+
+        except KeyError as ke:
+            print(f'ERROR KeyError {ke} . Skipping processing.')
+            return None
 
         except exceptions.ExifToolExecuteError:
             print(f'ERROR ExifToolExecuteError. Skipping processing.')
@@ -289,8 +312,12 @@ def xe2hack(filename):
                     log('Changed model to X-E2S')
                     continue
 
-        except exceptions.ExifToolExecuteError:
-            print(f'ERROR ExifToolExecuteError. Skipping processing.')
+        except KeyError as ke:
+            log(f'KeyError {ke} . Skipping.')
+            return None
+
+        except exceptions.ExifToolExecuteError as etee:
+            print(f'ExifToolExecuteError {etee} Skipping.')
             return None
 
 
@@ -301,7 +328,7 @@ def find_recipe(exif, recipes):
 
     results = []
 
-    if not R.SOOC in exif:
+    if exif[R.SOOC] == False:
         log('No SOOC, skipping find_recipe.')
         return results
 
@@ -916,16 +943,11 @@ def modify_keywords(filename, res, exif, threshold):
     """
 
     tags = []
-    sooc = False
-    update = False
+    sooc = exif[R.SOOC]
 
     # SOOC
-    if exif[R.MAKE].lower() == 'fujifilm' and \
-        exif[R.MODEL].lower().startswith('x') and \
-        exif[R.SOFTWARE].lower().startswith(f'digital camera {exif[R.MODEL].lower()}'):
+    if sooc == True:
         tags.append(SOOC)
-        sooc = True
-        update = True
 
     # Preserve other tags 
     old_tags = []
@@ -1000,7 +1022,7 @@ def modify_keywords(filename, res, exif, threshold):
         et.set_tags(filename, tags={tagname: wtags}, params=["-P", "-overwrite_original"])
 
 
-def write_report(filename, res, threshold):
+def write_report(filename, res, threshold, exif):
     """Print result to the console.
     res: Ascending list of rated recipes.
     """
@@ -1026,6 +1048,12 @@ def write_report(filename, res, threshold):
 
     for v in item[4]:
         print('       {:18s}: {:18s} {:18s} {:2d}%'.format(str(v[1]), str(v[2]), f'({str(v[3])})', v[0]))
+
+    print('\nOther Settings\n')
+
+    for key in exif:
+        print(f'{key}: {exif[key]}')
+
 
 
 def get_image_files(pathto):
@@ -1075,10 +1103,11 @@ def process():
 
         exif=read_file(f)
 
-        res = find_recipe(exif, recipes)
+        if exif is not None:
+            res = find_recipe(exif, recipes)
 
-        if args.print:
-            write_report(f, res, args.threshold[0])
+            if args.print:
+                write_report(f, res, args.threshold[0], exif)
 
         # Post processed image doesn't work 
         if exif is not None:

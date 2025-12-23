@@ -266,13 +266,13 @@ find ~/pictures -type f -iname "*.jpg" -print0 | xargs -0 ls -t | head -n10 | xa
 ## Tag description and tags jpeg-images with all possible suffixes (jpg, JPG, jpeg, JPEG)
 
 ```zsh
-find ~/pictures -type f -iname "*.jpg" -or -iname "*.jpeg"  -print0 | xargs -0 ls -t  | xargs python reciper.py  -d -k 
+find ~/pictures -type f \( -iname "*.jpg" -or -iname "*.jpeg" \) -print0 | xargs -0 ls -t  | xargs python reciper.py  -d -k 
 ```
 
 ## All toghter
 
 ```zsh
-find ~/pictures -type f -iname "*.jpg" -or -iname "*.jpeg" -print0 | xargs -0 ls -t | head -n10 | xargs python reciper.py -t 95 -d -k 
+find ~/pictures -type f \( -iname "*.jpg" -or -iname "*.jpeg" \) -print0 | xargs -0 ls -t | head -n10 | xargs python reciper.py -t 95 -d -k 
 ```
 
 
