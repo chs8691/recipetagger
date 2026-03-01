@@ -1,14 +1,11 @@
 # Simple tool to convert recipes file from a properitary csv to the reciper's csv file format. Can be used as template for other converter.
 # The created csv file is ready to import in recipes.py
 # Import CSV may not have spaces before or after the column values.
-# Works with my Tap Forms Pro database. CSV format:
-#   Separator: tab
-#   Values are not enclose with a character (like "")
+# Works with my memento database
 import argparse
 import csv
 import constants.recipefields as R
 import constants.csvfields as CSV
-import pathlib
 
 args = None
 
@@ -75,10 +72,9 @@ def main():
 
     all = []
 
-    # Default argument value is a string, but input comes as a list of characters
-    with open(str(''.join(args.input)), newline='') as rfile:
-        with open(str(''.join(args.output)), 'w', newline='') as wfile:
-            spamreader = csv.DictReader(rfile, delimiter='\t', quotechar='"', quoting=csv.QUOTE_ALL)
+    with open(args.input[0], newline='') as rfile:
+        with open('recipes.csv', 'w', newline='') as wfile:
+            spamreader = csv.DictReader(rfile, delimiter=',', quotechar='"')
             spamwriter = csv.writer(wfile, delimiter=',',
                                     quotechar='"', quoting=csv.QUOTE_ALL)
             
@@ -94,7 +90,7 @@ def main():
 def parse_args():
     global args
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input', type=str, nargs=1, default='import/X-Rezepte.csv',
+    parser.add_argument('-i', '--input', type=str, nargs=1, default='import/X-Recipes.csv',
                         help='Input CSV file (Default: %(default)s).')
 
     parser.add_argument('-o', '--output', type=str, nargs=1, default='recipes.csv',

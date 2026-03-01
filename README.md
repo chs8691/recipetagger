@@ -255,6 +255,75 @@ After re-opening the Fujifilm X-Raw Studio, the custom seettings for X-T50 are r
 
 HINT: In X Raw Studio _DR Priority_ = `Auto` can not be set to an image. So it is not possible to store this recipe value as custom setting to your camera with X Raw Studio. Instead, the value must be set in the camera directly.
 
+#### converter.py
+
+Update recipes from my local Tab Forms Pro formular _X-Rezepte_.
+
+##### Export from Tab Forms Pro
+First export formular _X-Rezepte_ in Tab Forms Pro by calling Dialog _Datensätze exportieren_ from _Datei > Exportieren > Datensätze (CSV, Excel)..._ 
+The settings are stored as Template `recipetagger` with this settings:
+
+Parameter|Wert
+---|---
+Exportieren als | CSV
+Dateikodierung  | Unicode (UTF-8)
+Spaltentrenner  | Tabulator
+Zeilenende      | Unix(LF)
+Zahlenformat    | kein Stil
+Datumsformat    | MM/dd/yyyy
+Zeitformat      | h:mm a
+Datensatz-ID exportieren         | nein
+Feldtyp Schlagwörter             | nein
+Verlinkte Datensätze exportieren | nein
+Medien exportieren               | nein
+
+And following fields (Felder):
+
+| Exportieren|Type|Feldname
+| :-:|---|---
+| X | A      | Name
+| X | A      | Film Simulation
+|   | Bild   | Bild
+|   | A      | Film
+| X | A      | X-Trans
+| X | A      | Publisher
+|   | Note   | Desciption
+| X | URL    | Website
+|   | Bool   | B/W
+|   | A      | Filter
+| X | A      | BW Color WC
+| X | A      | BW Color MC
+| X | A      | Grain Effect
+| X | A      | CCR Effect
+| X | A      | CCR FX Blue
+| X | A      | White Balance
+| X | 123    | Kelvin
+|   | f(x)   | WB Info
+| X | A      | White Balance R
+| X | A      | White Balance B
+| X | A      | Dynamic Range
+| X | A      | Dynamic Range Priority
+| X | f(x)   | Dynamic Range Info
+| X | A      | Highlights
+| X | A      | Shadows
+| X | A      | Color
+| X | A      | Sharpness
+| X | A      | High ISI NR
+| X | A      | Clarity
+| X | 123    | ISO min
+| X | 123    | ISO max
+|   | A      | Exposure Compensation
+|   | A      | Double Exposer
+|   | A      | Double Exposer Hint
+
+Press _[Exportieren]_ and save it in file `~/dev/recipetagger/import/X-Rezepte.csv`. Existing file will be overwritten.
+
+Now the recipetagger can be updated with it:
+
+```text
+python converter.py -i import/X-Rezepte.csv -o recipes.csv 
+```
+
 # Cheat Sheet
 
 ## Tag description and tags for the 10 newest "jpg"-images and check for 95% matching treshold
@@ -276,7 +345,7 @@ find ~/pictures -type f \( -iname "*.jpg" -or -iname "*.jpeg" \) -print0 | xargs
 ```
 
 
-## Update recipes from device export. 
+## Update recipes from Tab Forms Pro-Formular. 
 
 Prepare:
 
@@ -285,11 +354,10 @@ Prepare:
     source venv/bin/activate
 ```
   
-Renew it altogether now:
+After exporting to `import/X-Rezepte.csv` (see above), renew it now:
 
 ```zsh
-cp ~/Library/CloudStorage/SynologyDrive-externalChrisPictures/tmp/X-Recipes.csv import/ && \
-python converter.py -i import/X-Recipes.csv -o recipes.csv && \
+python converter.py -i import/X-Rezepte.csv -o recipes.csv && \
 rm -f customs/* && \
 python customs.py -i recipes.csv -t template.FP1 -o customs/ && \
 rm ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100_bak/* && \

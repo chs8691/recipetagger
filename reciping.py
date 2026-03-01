@@ -121,6 +121,7 @@ def extract_data(row):
 
     field = CSV.WHITE_BALANCE_R          
     if len(row[field]) > 0:
+        print(f'row[field]={row[field]}')
         value=int(row[field])
     else:
         value = 0
