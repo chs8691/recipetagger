@@ -2,7 +2,7 @@
 A small set of tools to manage recipes for Fujfilm X cameras:
 
 * **reciper.py** - Search best matching recipe for a Fujifilm X image. Optional update image's description and keyword.
-* **customs.py** - Copies the recipes to customer settings files (`FP1`) for Fujifilm X RAW Studio. Tested with X RAW Studio 1.25.0.1.
+* **customs.py** - Copies the recipes to customer settings files (`FP1`) for FUJIFILM X RAW STUDIO. Tested with X RAW Studio 1.25.0.1.
 * **converter.py** - Example script to convert recipes into the import CSV-format.  
 
 Recipes must be stored in a csv file. See example file `recipes.csv`. There are great sources for recipes, like the marvellous [Fuji X Weekly](https://fujixweekly.com). 
@@ -15,7 +15,7 @@ The **reciper** script compares the exif data of one or more images with the rec
 
 In addition, the image can be tagged with the film simulation name.
 
-The **customs** script creates for every recipe in the CSV file a `FP1` file. For this an existing FP1 file for your camera is needed as template file. Copy this files into your camera's sub directory of your Fujifilm X RAW Studio installation. For instance, on MacOS the directory is for X-T50 camera
+The **customs** script creates for every recipe in the CSV file a `FP1` file. For this an existing FP1 file for your camera is needed as template file. Copy this files into your camera's sub directory of your _FUJIFILM X RAW STUDIO_ installation. For instance, on MacOS the directory is for X-T50 camera
 
 ```text
 ~/Library/Application Support/com.fujifilm.denji/X RAW STUDIO/X-T50/X-T50_0100
@@ -98,7 +98,7 @@ Exiftool and Python 3 must be installed on your system.
 
 #### reciper.py
 
-For the ricipes, the given file 'recipes.csv' is used (default name).
+For the recipes, the given file 'recipes.csv' is used (default name).
 
 Print infos to console:
 ```console
@@ -180,7 +180,7 @@ Found 2 file(s).
 
 Processed all 2 image(s) successfully.
 ```
-If you have changed an image file with Fujifilm X RAW Studio you can just update the last modified file. For instance:
+If you have changed an image file with _FUJIFILM X RAW STUDIO_ you can just update the last modified file. For instance:
 
 ```console
 find ~/Pictures -iname "*.j*"  | head -n1 | xargs python reciper.py -d -k 
@@ -221,7 +221,7 @@ ISO: 640%
 
 Example on MacOS for camera X-T50.
 
-The script creates FP1 files for X-T50 camera. For this, an existing FP1 file from Fujifilm X Raw Studio has to be used as template. For instance you have saved a custom settings with the name _my-custom-settings_:
+The script creates FP1 files for X-T50 camera. For this, an existing FP1 file from _FUJIFILM X RAW STUDIO_ has to be used as template. For instance you have saved a custom settings with the name _my-custom-settings_:
 
 ```console
 cp ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100/my-custom-settings.FP1 template.FP1
@@ -240,7 +240,7 @@ Create FP1 files into directory `customs` (must exists):
 $ python customs.py -i recipes.csv -t template.FP1 -o customs/
 ```
 
-Backup existing Fujifilm X Raw Studio settings (the name of the subdirectory may vary):
+Backup existing _FUJIFILM X RAW STUDIO_ settings (the name of the subdirectory may vary):
 ```console
 $ mkdir ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100_bak 
 $ mv ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100/* ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100_bak/
@@ -253,14 +253,16 @@ $ mv customs/* ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/
 
 After re-opening the Fujifilm X-Raw Studio, the custom seettings for X-T50 are ready to use. 
 
-HINT: In X Raw Studio _DR Priority_ = `Auto` can not be set to an image. So it is not possible to store this recipe value as custom setting to your camera with X Raw Studio. Instead, the value must be set in the camera directly.
+HINT: In _FUJIFILM X RAW STUDIO_ _DR Priority_ = `Auto` can not be set to an image. So it is not possible to store this recipe value as custom setting to your camera with FUJIFILM X RAW STUDIO. Instead, the value must be set in the camera directly.
 
 #### converter.py
 
-Update recipes from my local Tab Forms Pro formular _X-Rezepte_.
+Update recipes from my local Tap Forms Pro formular _X-Rezepte_.
 
-##### Export from Tab Forms Pro
-First export formular _X-Rezepte_ in Tab Forms Pro by calling Dialog _Datensätze exportieren_ from _Datei > Exportieren > Datensätze (CSV, Excel)..._ 
+<a id="export_from_tap_forms_pro"></a>
+##### Export from Tap Forms Pro
+
+First export formular _X-Rezepte_ in Tap Forms Pro by calling Dialog _Datensätze exportieren_ from _Datei > Exportieren > Datensätze (CSV, Excel)..._ 
 The settings are stored as Template `recipetagger` with this settings:
 
 Parameter|Wert
@@ -268,7 +270,7 @@ Parameter|Wert
 Exportieren als | CSV
 Dateikodierung  | Unicode (UTF-8)
 Spaltentrenner  | Tabulator
-Zeilenende      | Unix(LF)
+Zeilenende      | Unix (LF)
 Zahlenformat    | kein Stil
 Datumsformat    | MM/dd/yyyy
 Zeitformat      | h:mm a
@@ -281,7 +283,9 @@ And following fields (Felder):
 
 | Exportieren|Type|Feldname
 | :-:|---|---
-| X | A      | Name
+|   | f(x)   | Name
+| X | A      | Bezeichnung
+| X | Bool   | Draft
 | X | A      | Film Simulation
 |   | Bild   | Bild
 |   | A      | Film
@@ -303,7 +307,7 @@ And following fields (Felder):
 | X | A      | White Balance B
 | X | A      | Dynamic Range
 | X | A      | Dynamic Range Priority
-| X | f(x)   | Dynamic Range Info
+|   | f(x)   | Dynamic Range Info
 | X | A      | Highlights
 | X | A      | Shadows
 | X | A      | Color
@@ -316,7 +320,7 @@ And following fields (Felder):
 |   | A      | Double Exposer
 |   | A      | Double Exposer Hint
 
-Press _[Exportieren]_ and save it in file `~/dev/recipetagger/import/X-Rezepte.csv`. Existing file will be overwritten.
+Press **[Exportieren]** and save it in file `~/dev/recipetagger/import/X-Rezepte.csv`. Existing file will be overwritten.
 
 Now the recipetagger can be updated with it:
 
@@ -345,27 +349,92 @@ find ~/pictures -type f \( -iname "*.jpg" -or -iname "*.jpeg" \) -print0 | xargs
 ```
 
 
-## Update recipes from Tab Forms Pro-Formular. 
+## Update recipes from Tap Forms Pro-Formular. 
 
-Prepare:
+### Short
 
 ```zsh
     cd /Users/chris/dev/recipetagger  
     source venv/bin/activate
 ```
-  
-After exporting to `import/X-Rezepte.csv` (see above), renew it now:
+```zsh
+    x_root=~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50 && \
+    x_camdir=$x_root/X-T50_0100 && \
+    x_bak=${x_camdir}_bak && \
+    python converter.py -i import/X-Rezepte.csv -o recipes.csv && \
+rm -rf customs && mkdir customs && \
+python customs.py -i recipes.csv -t template.FP1 -o customs/  && \
+rm -rf $x_bak && \
+mkdir $x_bak && \
+mv $x_camdir/* $x_bak && \
+mv customs/* $x_camdir/ 
+```
+ 
+
+### Step by step
+
+Replace all _User Profiles_ from the recipes formular in Tap Forms Pro.
+
+1. Prepare python environment and set your specific path variables: 
+```zsh
+    cd /Users/chris/dev/recipetagger  
+    source venv/bin/activate
+```
+Set OS and camera dependend path variables:
 
 ```zsh
-python converter.py -i import/X-Rezepte.csv -o recipes.csv && \
-rm -f customs/* && \
-python customs.py -i recipes.csv -t template.FP1 -o customs/ && \
-rm ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100_bak/* && \
-mv customs/* ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100/
+    x_root=~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50 && \
+    x_camdir=$x_root/X-T50_0100 && \
+    x_bak=${x_camdir}_bak 
+```
+
+All operations will be done here in the directory `recipetagger`.
+
+2. Export from Tap Forms Pro
+
+See [Export from Tap Forms Pro](#export_from_tap_forms_pro). The exported data will be saved into file `import/X-Rezepte.csv`. 
+
+3. Convert into script's format:
+
+```zsh
+python converter.py -i import/X-Rezepte.csv -o recipes.csv 
 ```   
+Now the data are in `recipes.csv`.
+
+4. Prepare blank output directory for profile files:
+
+```zsh
+rm -rf customs && mkdir customs
+```   
+Now `customs/` exists and is empty.
+
+5. Create user profile files
+
+Create user profile file for every recipe:
+
+```zsh
+python customs.py -i recipes.csv -t template.FP1 -o customs/ 
+``` 
+
+Now in `customs\` are the `FP1` files.
+
+6. Move profile files to FUJIFILM X RAW STUDIO
+
+Delete all existing profiles and replace them with new ones.
+
+```zsh
+rm -rf $x_bak && \
+mkdir $x_bak && \
+mv $x_camdir/* $x_bak && \
+mv customs/* $x_camdir/
+```   
+Now all `FP1` files are in the _FUJIFILM X RAW STUDIO_ directory and previous files are backed up.
 
 Check result:
 
 ```zsh
-ls -l ~/Library/Application\ Support/com.fujifilm.denji/X\ RAW\ STUDIO/X-T50/X-T50_0100/
+ls -l $x_camdir
 ```
+All `FP1` files should be listed here. 
+
+Restart _FUJIFILM X RAW STUDIO_ to make them visible.

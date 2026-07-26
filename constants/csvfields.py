@@ -1,6 +1,7 @@
 # Field names of the csv import file.
 
 NAME                = 'Name'
+DRAFT               = 'Draft'
 PUBLISHER           = 'Publisher'
 WEBSITE             = 'Website'
 FILMSIMULATION      = 'Film Simulation'

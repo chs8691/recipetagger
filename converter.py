@@ -8,13 +8,13 @@ import argparse
 import csv
 import constants.recipefields as R
 import constants.csvfields as CSV
-import pathlib
 
 args = None
 
 # Destination field
 rfields = [
     R.NAME,
+    R.DRAFT,
     R.PUBLISHER,
     R.WEBSITE,
     R.FILMSIMULATION,
@@ -45,6 +45,7 @@ rfields = [
 # Source
 cfields = [
     CSV.NAME,
+    CSV.DRAFT,
     CSV.PUBLISHER,
     CSV.WEBSITE,
     CSV.FILMSIMULATION,

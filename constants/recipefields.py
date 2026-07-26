@@ -2,6 +2,7 @@
 # This fields will be used for recipe and for image data.
 
 NAME  = 'Name'                            # Recipe name or file name 
+DRAFT = 'Draft'                           # Flag to mark draft recipes
 PUBLISHER  = 'Publisher'                  # Publisher, String.  Empty if private recipe (recipe only)
 WEBSITE  = 'Website'                      # Website, String.  Empty if private recipe (recipe only)
 FILMSIMULATION   = 'Filmsimulation'       # String Fujifilm's Simulation Name. See FS....

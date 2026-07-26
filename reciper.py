@@ -76,7 +76,7 @@ def parse_args():
     parser.add_argument('-t', '--threshold', type=int, nargs=1, default=THRESHOLD,
                         help=f'Threshold value for the match of percent of EXIF data and recipe (default: {THRESHOLD[0]}) ')
     parser.add_argument('-p', '--print', action='store_true',
-                        help='Print result to console')
+                        help='Print result to console: Best recipe, divergent setting, EXIF setting. If best recipe is a draft, just print EXIFs.')
     parser.add_argument('-d', '--description', action='store_true',
                         help='Insert result into image description')
     parser.add_argument('-k', '--keywords', action='store_true',
@@ -352,7 +352,7 @@ def find_recipe(exif, recipes):
 def check_recipe(exif, recipe):
     """ Compare image exifs data wth recipe's data to find differences and calculate a
         total score percentage value.
-        Returns tuple with three values:
+        Returns tuple with this values:
         - 0: score percetange value (0..100)
         - 1: Name of the recipe
         - 2: Pubisher of the recipe
@@ -362,13 +362,21 @@ def check_recipe(exif, recipe):
           - Field name
           - exif value
           - recipe value
-        Example: ( 90, 'Recipe No. 1', [(10, R.COLOR, 2, -2)] )
+        - 5: Draft flag
+
+        Example: ( 90, 'Recipe No. 1', 'www', [(10, R.COLOR, 2, -2)], 'Nein' )
         Every single score will be weightend between 0..10. For instance FILMSIMULATION
         is very important: weight=10
         Returns None, if comparing not possible, for instance when DR Auto is used.
         If Returns None, a Message will be printed.
     """
+
+    # Failed data for every failed check
     failed = []
+
+    # Every checked exif data, failed or not. Used for drafts.
+    exifs = []
+
     total = 0
     max_total = 0
     MAX = 100
@@ -384,7 +392,6 @@ def check_recipe(exif, recipe):
     max_total += MAX * weight
     if act < MAX:
         failed.append((act, field, exif[field], recipe[field]))
-
 
     field = R.DRANGE_PRIORITY
     weight = 5
@@ -404,6 +411,7 @@ def check_recipe(exif, recipe):
     max_total += MAX * weight
     if act < MAX:
         failed.append((act, field, evalue, rvalue))
+
 
 
     field = R.DYNAMIC_RANGE
@@ -435,7 +443,7 @@ def check_recipe(exif, recipe):
         max_total += MAX * weight
         if act < MAX:
             failed.append((act, field, exif[field], recipe[field]))
-
+    
 
         field = R.HIGHLIGHTS
         weight = 2
@@ -455,7 +463,7 @@ def check_recipe(exif, recipe):
         max_total += MAX * weight
         if act < MAX:
             failed.append((act, field, exif[field], recipe[field]))
-
+    
         field = R.CCR_EFFECT
         weight = 2
         act =  rate_range(0, 2, cc_as_int(exif[field]), cc_as_int(recipe[field]))
@@ -535,7 +543,6 @@ def check_recipe(exif, recipe):
         failed.append((act, field, exif[field], recipe[field]))
 
 
-
     bws=[FS.ACROS, FS.MONOCHROME]
     nocol=[FS.ACROS, FS.MONOCHROME, FS.SEPIA]
     if exif[R.FILMSIMULATION] in bws and recipe[R.FILMSIMULATION] in bws:
@@ -593,13 +600,13 @@ def check_recipe(exif, recipe):
         max_total += MAX * weight
         if act < MAX:
             failed.append((act, field, exifval, recipeval))
-
+    
         field = R.BW_COLOR_MC
         total += act * weight
         max_total += MAX * weight
         if act < MAX:
             failed.append((act, field, exifval, recipeval))
-
+    
 
     field = R.ISO_MIN
     weight = 1
@@ -626,10 +633,9 @@ def check_recipe(exif, recipe):
     if act < MAX:
         failed.append((act, field, exif[field], recipe[field]))
 
-
     failed.sort(key=lambda a: a[0])
 
-    return (int(total * 100 / max_total), recipe[R.NAME], recipe[R.PUBLISHER], recipe[R.WEBSITE], failed)
+    return (int(total * 100 / max_total), recipe[R.NAME], recipe[R.PUBLISHER], recipe[R.WEBSITE], failed, recipe[R.DRAFT], exifs)
 
 
 
@@ -870,7 +876,7 @@ def gather(exif):
 def write_description(filename, res, exif, threshold):
     """Update description in the image file
     res: Ascending list of rated recipes.
-    exif: If no valid match found, EXIF data will be printed instead
+    exif: If no valid match found or if recipe is a draft, EXIF data will be printed instead
     To show it in digikam the text will be saved in multiple fields, but without language association.
     """
     
@@ -900,8 +906,20 @@ def write_description(filename, res, exif, threshold):
         item = res[0]
 
 
-        # Print as recipe match
-        if item[0] >= threshold:
+        # DRAFT: just EXIFs
+        if item[5] == 'Ja':
+
+            # Recipe name and publisher
+            lines.append('DRAFT {}'.format(item[1]))
+
+            for line in extract_exif_settings(exif):
+                lines.append(line)
+            
+            lines.append('\n')
+
+
+        # Print as recipe match if hit or if draft
+        elif item[0] >= threshold:
 
             # Recipe name and publisher
             lines.append('{} by {}'.format(item[1], item[2]))
@@ -934,6 +952,17 @@ def write_description(filename, res, exif, threshold):
 
     if ret.returncode != 0:
         print(f"ERROR Update image description failed. Returncode={ret.returncode}")
+
+def extract_exif_settings(exif):
+    """"Returns exif reduced to image settings."""
+
+    ret = []
+
+    for key in exif:
+        if key != 'Name' and key != 'MODEL' and key != 'X-Trans Version' and key != 'MAKE' and key != 'SOFTWARE' and key != 'SOOC':
+           ret.append(f'{key}: {exif[key]}')
+    
+    return ret
 
 
 def modify_keywords(filename, res, exif, threshold):
@@ -982,9 +1011,15 @@ def modify_keywords(filename, res, exif, threshold):
             
         tags.append(f'{FS_ROOT}/{subdir}/{exif[R.FILMSIMULATION].replace('_', ' ').title()}')
 
-        if len(res) > 0 and res[0][0] >= threshold:
-            field = R.NAME
-            tags.append(f'{RECIPE_ROOT}/{res[0][2]}/{res[0][1]}')
+        if len(res) > 0:
+            # DRAFT
+            if res[0][5] == 'Ja':
+                field = R.NAME
+                tags.append(f'{RECIPE_ROOT}/Draft/{res[0][1]}') 
+            # Published    
+            elif res[0][0] >= threshold:
+                field = R.NAME
+                tags.append(f'{RECIPE_ROOT}/{res[0][2]}/{res[0][1]}')
 
 
     # For the specific tags different formats
@@ -1025,6 +1060,7 @@ def modify_keywords(filename, res, exif, threshold):
 def write_report(filename, res, threshold, exif):
     """Print result to the console.
     res: Ascending list of rated recipes.
+    item structure: see check_recipe
     """
     
     print(f'\n{path.basename(filename)}')
@@ -1034,6 +1070,14 @@ def write_report(filename, res, threshold, exif):
         return
 
     item = res[0]
+
+    # Draft recipe
+    if item[5] == 'Ja':
+
+        print(f'Best recipe is DRAFT ({item[0]}%): {item[1]}')
+        for line in extract_exif_settings(exif):
+            print(line)
+        return
 
     if item[0] == 100:
         print(f'   Complete fitting recipe: {item[1]}')
